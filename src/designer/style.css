@@ -590,3 +590,10 @@ fieldset.roto-focused {
   margin-right: auto;
   color: #acbdcf;
 }
+.footer-links a {
+  color: inherit;
+  pointer-events: auto;
+}
+.footer-links a:hover {
+  color: #e8edf5;
+}

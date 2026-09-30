@@ -428,7 +428,11 @@ for (const [slot, item] of Object.entries(userSlots.presets)) {
 }
 /** The dev server keeps ONE shared library (every device and address);
  *  browser storage stays a local backup and the fallback without a host. */
-const SLOTS_API = "/api/slots";
+// Relative, so a host serving the Designer under a sub-path also serves its APIs there.
+const SLOTS_API = "api/slots";
+const GENERATE_API = "api/generate";
+/** False on static hosting (e.g. GitHub Pages): AI generation needs the local dev host. */
+let aiAvailable = true;
 let hostSlots = false;
 function putHostSlot(kind: "shapes" | "presets", key: string, item: SavedShape | SavedDesign) {
   return fetch(SLOTS_API, {
@@ -1373,6 +1377,11 @@ el<HTMLFormElement>("design-prompt").onsubmit = async (event) => {
   if (button.disabled) return;
   const typed = el<HTMLTextAreaElement>("design-request").value.trim();
   if (!typed && !inspiration) return;
+  if (!aiAvailable) {
+    el("design-status").textContent =
+      "AI design generation needs the local Designer host: clone the repo, add an OpenAI key to .env.local and run npm run dev.";
+    return;
+  }
   if (typed) rememberPrompt(typed);
   const prompt = typed || "Design a particle field inspired by this photo.";
   const image = inspiration;
@@ -1387,7 +1396,7 @@ el<HTMLFormElement>("design-prompt").onsubmit = async (event) => {
   el("design-prompt").setAttribute("aria-busy", "true");
   el("design-status").textContent = "Designing your particle field…";
   try {
-    const response = await fetch("/api/generate", {
+    const response = await fetch(GENERATE_API, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -1422,7 +1431,7 @@ el<HTMLFormElement>("design-prompt").onsubmit = async (event) => {
   }
 };
 
-void fetch("/api/generate")
+void fetch(GENERATE_API)
   .then(async (response) => {
     if (!response.ok) throw new Error();
     const config = await response.json();
@@ -1445,6 +1454,7 @@ void fetch("/api/generate")
     select.dispatchEvent(new Event("change"));
   })
   .catch(() => {
+    aiAvailable = false;
     el("design-model").textContent = " · AI unavailable";
   });
 

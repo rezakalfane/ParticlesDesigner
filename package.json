@@ -21,6 +21,7 @@
     "dev": "vite --host",
     "build": "tsc --noEmit && vite build",
     "build:embed": "vite build --config vite.embed.config.ts && tsc -p tsconfig.embed.json",
+    "build:site": "npm run build && npm run build:embed && node scripts/build-site.mjs",
     "examples": "npm run build:embed && vite --open /examples/",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",

@@ -36,6 +36,8 @@ function designerHost(): Plugin {
 
 export default defineConfig({
   plugins: [designerHost()],
+  // Relative asset URLs: the static build works under any sub-path (e.g. GitHub Pages).
+  base: "./",
   server: { port: 5180 },
   preview: { port: 5180 },
   build: { outDir: "dist", target: "es2022" },
