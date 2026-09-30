@@ -113,8 +113,8 @@ try {
   await page.click('[data-audio="manual"]');
   await page.waitForTimeout(500);
   assert.equal(await page.evaluate(() => window.field.audioStatus), "Manual audio levels");
-  // Audio really modulates: demo pulse + audioDepth drives the low band; without the override
-  // Electric bloom (Audio depth 0) stays still.
+  // Audio really modulates: demo pulse + audioDepth drives the low band; audioDepth 0 silences
+  // it, and without the override the look's own depth (every factory look reacts) drives it.
   await page.click('[data-audio="demo"]');
   await page.waitForTimeout(1200);
   const driven = await page.evaluate(async () => {
@@ -123,13 +123,21 @@ try {
       peak = Math.max(peak, window.field.lastVisible.low);
       await new Promise((r) => setTimeout(r, 40));
     }
-    window.field.audioDepth = undefined;
+    window.field.audioDepth = 0;
     await new Promise((r) => setTimeout(r, 1500));
-    return { peak, after: window.field.lastVisible.low };
+    const silenced = window.field.lastVisible.low;
+    window.field.audioDepth = undefined;
+    let own = 0;
+    for (let i = 0; i < 30; i++) {
+      own = Math.max(own, window.field.lastVisible.low);
+      await new Promise((r) => setTimeout(r, 40));
+    }
+    return { peak, silenced, own };
   });
   assert(driven.peak > 0.1, `audioDepth drives the field (peak low ${driven.peak})`);
-  assert(driven.after < 0.01, `look's own depth 0 is silent (low ${driven.after})`);
-  console.log("  ✓ manual audio levels; demo audio drives the field only with audioDepth");
+  assert(driven.silenced < 0.01, `audioDepth 0 is silent (low ${driven.silenced})`);
+  assert(driven.own > 0.1, `the look's own depth reacts (peak low ${driven.own})`);
+  console.log("  ✓ manual audio levels; demo audio drives the field; audioDepth overrides it");
 
   // Designer Embed dialog → snippet renders in a blank page.
   await visit("", 1500);

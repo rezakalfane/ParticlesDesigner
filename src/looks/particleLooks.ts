@@ -30,7 +30,31 @@ export interface ParticleLook {
   /** Optional shape mixture; hosts without blending render the dominant `formation`. */
   formationWeights?: number[];
 }
-export const PARTICLE_LOOKS: readonly ParticleLook[] = [
+/**
+ * Every factory look is performable: its audio response is on (Audio depth at least 1,
+ * yet nothing moves until an audio input is chosen), and Ripple shockwaves and the
+ * collapse → explode → reform cycle are available with non-zero strengths. Authored
+ * values are kept wherever they already allow this. Applied to the whole catalog.
+ */
+export function performable(look: ParticleLook): ParticleLook {
+  const settings = { ...look.settings };
+  const atLeast = (key: string, fallback: number) => {
+    if (!settings[key]) settings[key] = fallback;
+  };
+  atLeast("Audio depth", 1);
+  atLeast("Shockwave", 0.7);
+  atLeast("Implosion", 0.9);
+  atLeast("Explosion", 0.65);
+  return {
+    ...look,
+    settings,
+    shockEnabled: true,
+    audioEnabled: true,
+    ...(look.groups ? { groups: { ...look.groups, audio: true, shock: true, cycle: true } } : {}),
+  };
+}
+
+export const PARTICLE_LOOKS: readonly ParticleLook[] = (<ParticleLook[]>[
   {
     id: "deep-sea",
     name: "Deep sea",
@@ -411,4 +435,4 @@ export const PARTICLE_LOOKS: readonly ParticleLook[] = [
       "Rotation Y": 0.025,
     },
   },
-];
+]).map(performable);

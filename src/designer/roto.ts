@@ -27,7 +27,12 @@ export function connectDesignerRoto(host: DesignerRotoHost, container: HTMLEleme
   const candidate = document.createElement("span");
   const pages = document.createElement("div");
   pages.className = "designer-roto-pages";
-  strip.append(connect, status, candidate, pages);
+  const setupFiles = document.createElement("a");
+  setupFiles.href = "roto/";
+  setupFiles.target = "_blank";
+  setupFiles.textContent = "Get the ROTO-SETUP files (channels 9–11)";
+  setupFiles.className = "designer-roto-files";
+  strip.append(connect, status, candidate, pages, setupFiles);
   container.prepend(strip);
   let active: { setup: number; page: number } | undefined;
   let pending: ReturnType<typeof setTimeout> | undefined;

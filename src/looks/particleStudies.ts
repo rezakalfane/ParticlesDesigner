@@ -1,9 +1,9 @@
-import type { ParticleLook } from "./particleLooks";
+import { performable, type ParticleLook } from "./particleLooks";
 /**
  * Particles Designer studies in the factory catalog. They follow the sixteen
  * PARTICLE_LOOKS, starting at Preset Bank 2 (see particleFactory.ts).
  */
-export const PARTICLE_STUDIES: readonly ParticleLook[] = [
+export const PARTICLE_STUDIES: readonly ParticleLook[] = (<ParticleLook[]>[
   {
     id: "solar-system",
     name: "Solar system",
@@ -301,4 +301,4 @@ export const PARTICLE_STUDIES: readonly ParticleLook[] = [
       "Rotation Z": 0,
     },
   },
-];
+]).map(performable);

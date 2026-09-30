@@ -293,8 +293,75 @@ footer {
   gap: 5px;
 }
 .lab-bank-slots button {
+  position: relative;
   min-height: 37px;
   overflow-wrap: anywhere;
+}
+/* Slot origin badge: hollow ring = built-in, filled dot = saved (hover: × to delete). */
+.slot-badge,
+.slot-dot {
+  box-sizing: border-box;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  border: 1px solid #7d8da3;
+}
+.slot-badge {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  opacity: 0.6;
+  pointer-events: none;
+}
+.slot-saved .slot-badge,
+.slot-dot-saved {
+  border-color: #6fd3ff;
+  background: #6fd3ff;
+  box-shadow: 0 0 6px #6fd3ff99;
+  opacity: 1;
+}
+.slot-saved:hover .slot-badge,
+.slot-saved:focus-visible .slot-badge {
+  top: 2px;
+  right: 2px;
+  width: 16px;
+  height: 16px;
+  display: grid;
+  place-items: center;
+  background: #0c1826;
+  border-color: #79bad9;
+  box-shadow: none;
+  pointer-events: auto;
+  cursor: pointer;
+}
+.slot-saved:hover .slot-badge::before,
+.slot-saved:focus-visible .slot-badge::before {
+  content: "×";
+  color: #e8edf5;
+  font-size: 13px;
+  line-height: 1;
+}
+.slot-saved .slot-badge:hover {
+  background: #6b1f2a;
+  border-color: #ff8d9b;
+}
+.slot-legend {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 5px;
+}
+.slot-dot {
+  display: inline-block;
+  margin-left: 4px;
+}
+.slot-dot:first-child {
+  margin-left: 0;
+}
+.library-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 5px;
 }
 .lab-empty-slot {
   opacity: 0.35;
@@ -540,6 +607,9 @@ body.clean .design-prompt {
   padding-bottom: 16px;
   font-size: 11px;
   color: #a8b7ca;
+}
+.designer-roto-files {
+  color: #8fb7d8;
 }
 .designer-roto-pages {
   display: grid;

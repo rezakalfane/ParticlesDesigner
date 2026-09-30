@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { BAKED_SHAPE_SLOTS } from "../src/designer/bakedLibrary";
 import { BAKED_LOOK_SLOTS as BAKED_PRESET_SLOTS } from "../src/looks/particleBakedLooks";
+import { performable } from "../src/looks/particleLooks";
 import { LAB_SHAPES, PRESET_BANKS, SHAPE_BANKS } from "../src/designer/banks";
 import { parseDesign } from "../src/designer/design";
 import { BAKED_FORMATION_START, BAKED_SHAPES } from "../src/engine/bakedShapes";
@@ -21,7 +22,10 @@ describe("baked Designer library", () => {
       const parsed = parseDesign(preset);
       expect(parsed.formation, preset.name).not.toBe(CUSTOM_FORMATION);
       expect(parsed.geometry, preset.name).toBeUndefined();
-      expect(PRESET_BANKS[Math.floor(Number(key) / 16)][Number(key) % 16]).toBe(preset);
+      // Banks hold the performable copy (audio, ripple and cycle available).
+      expect(PRESET_BANKS[Math.floor(Number(key) / 16)][Number(key) % 16]).toEqual(
+        performable(preset),
+      );
     }
     for (const [key, shape] of Object.entries(BAKED_SHAPE_SLOTS)) {
       expect(shape.formation, shape.name).not.toBe(CUSTOM_FORMATION);

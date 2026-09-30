@@ -1,8 +1,14 @@
 # Particles Designer — ROTO-CONTROL
 
 The Designer uses MIDI channels **9, 10, 11** (channels 1–8 stay free for other
-setups, e.g. LUMEN's 1–4 and 8). Import the three files in `roto/`
-into ROTO-SETUP and sync them to the hardware (setup indices 9–11). Keep the
+setups, e.g. LUMEN's 1–4 and 8).
+
+**Get the setup files:** [download page](https://rezakalfane.github.io/ParticlesDesigner/roto/)
+(also linked from the Designer's ROTO status), `roto/` in this repository, or the CDN:
+`https://cdn.jsdelivr.net/npm/@absolumont/particles-designer@0.1/roto/9%20PD%20PERFORM.json`
+(and `10%20PD%20DESIGN.json`, `11%20PD%20MOTION.json`); they ship in the npm package.
+
+Import the three files into ROTO-SETUP and sync them to the hardware (setup indices 9–11). Keep the
 assigned channels unchanged. These exports use the observed v1 format only.
 
 Connect the USB ROTO and open the Designer in a Web MIDI capable browser such as

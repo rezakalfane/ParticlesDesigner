@@ -56,6 +56,20 @@ describe("Designer shared slot library", () => {
     );
     expect(Object.keys((await call(api, "GET")).data.presets).sort()).toEqual(["32", "33", "34"]);
   });
+  it("deletes one slot (item null) and leaves the others", async () => {
+    const api = createDesignerSlotsApi(tempFile());
+    await call(api, "PUT", { kind: "presets", slot: 31, item: preset });
+    await call(api, "PUT", { kind: "presets", slot: 32, item: preset });
+    await call(api, "PUT", { kind: "shapes", slot: 40, item: shape });
+    expect((await call(api, "PUT", { kind: "presets", slot: 31, item: null })).status).toBe(200);
+    const { data } = await call(api, "GET");
+    expect(Object.keys(data.presets)).toEqual(["32"]);
+    expect(Object.keys(data.shapes)).toEqual(["40"]);
+    // Deleting an empty slot is harmless; invalid slots are rejected.
+    expect((await call(api, "PUT", { kind: "shapes", slot: 5, item: null })).status).toBe(200);
+    expect((await call(api, "PUT", { kind: "shapes", slot: 64, item: null })).status).toBe(400);
+    expect((await call(api, "PUT", { kind: "shapes", slot: "x", item: null })).status).toBe(400);
+  });
   it("rejects cross-origin and invalid writes", async () => {
     const file = tempFile();
     const api = createDesignerSlotsApi(file);

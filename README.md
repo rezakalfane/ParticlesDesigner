@@ -5,7 +5,8 @@
 **ABSOLUMONT / Particles Designer** — author luminous GPU particle fields in the
 browser: 1k–200k procedural WebGL2 points forming built-in, baked or AI-invented
 shapes, with light, ribbons, attractors, motion, shockwaves, a collapse → explode →
-reform cycle and audio reactivity. Browse four banks of factory looks and shapes,
+reform cycle and audio reactivity. Every factory look is ready to perform: audio,
+ripples and the cycle are all available. Browse four banks of factory looks and shapes,
 save your own, describe a field in words (optionally with an inspiration photo),
 and play it all from a ROTO-CONTROL. Then drop any look into a web page with the
 embed kit.
@@ -42,6 +43,19 @@ Saved presets and shapes are written by the dev host to one JSON library
 with `PARTICLES_DESIGNER_DATA_DIR`), so every device that opens the dev server
 shares them. Browser storage is the fallback when no host is available.
 `npm run bake` turns saved work into factory code (see docs).
+
+Slot badges tell them apart: a hollow ring is built-in, a filled dot is saved.
+Hover a saved slot for × (or press Delete) to remove it; a built-in it covered
+comes back. **Export library** / **Import…** (under Presets) back up and move
+saved work between browsers, or into your local copy; Import also accepts a
+single look downloaded from Embed.
+
+### ROTO-CONTROL
+
+Three setups (MIDI channels 9–11) play every page of the Designer:
+[download them](https://rezakalfane.github.io/ParticlesDesigner/roto/) (also
+linked from the Designer), find them in `roto/`, or on the CDN. See the
+[map and guide](https://github.com/rezakalfane/ParticlesDesigner/blob/main/docs/ROTO-CONTROL.md).
 
 ## Embed a look in any web page
 

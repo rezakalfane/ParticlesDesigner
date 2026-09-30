@@ -5,7 +5,7 @@
  * address) sees the same library.
  *
  *  - GET  → the whole library (missing file = empty library);
- *  - PUT  {kind, slot, item} → validates and writes ONE slot, so two devices
+ *  - PUT  {kind, slot, item} → validates and writes ONE slot (item null deletes it), so two devices
  *    saving different slots never overwrite each other;
  *  - writes are same-origin only, bounded, serialized and atomic (tmp + rename);
  *  - an unreadable file is never overwritten (writes refuse until it is fixed).
@@ -15,6 +15,7 @@ import type { IncomingMessage, ServerResponse } from "node:http";
 import { dirname, join } from "node:path";
 import {
   parseSlotItem,
+  SLOT_KEY,
   parseUserSlots,
   type SlotKind,
   type UserSlots,
@@ -64,7 +65,7 @@ export function createDesignerSlotsApi(file = defaultDesignerSlotsFile()) {
       return send(403, { error: "A same-origin request is required." });
     if (!req.headers["content-type"]?.startsWith("application/json"))
       return send(415, { error: "Use JSON." });
-    let kind: SlotKind, slot: string, item: UserSlots[SlotKind][string];
+    let kind: SlotKind, slot: string, item: UserSlots[SlotKind][string] | null;
     try {
       let body = "";
       for await (const chunk of req) {
@@ -76,13 +77,19 @@ export function createDesignerSlotsApi(file = defaultDesignerSlotsFile()) {
       if (data.kind !== "presets" && data.kind !== "shapes") throw new Error();
       kind = data.kind;
       slot = String(data.slot);
-      item = parseSlotItem(kind, slot, data.item);
+      if (data.item === null) {
+        if (!SLOT_KEY.test(slot)) throw new Error();
+        item = null;
+      } else item = parseSlotItem(kind, slot, data.item);
     } catch {
       return send(400, { error: "Invalid saved slot." });
     }
     const write = queue.then(async () => {
       const slots = await read();
-      const next = { ...slots, [kind]: { ...slots[kind], [slot]: item } };
+      const entries = { ...slots[kind] } as Record<string, unknown>;
+      if (item === null) delete entries[slot];
+      else entries[slot] = item;
+      const next = { ...slots, [kind]: entries } as UserSlots;
       await mkdir(dirname(file), { recursive: true });
       const tmp = `${file}.${process.pid}.tmp`;
       await writeFile(tmp, JSON.stringify(next, null, 2));

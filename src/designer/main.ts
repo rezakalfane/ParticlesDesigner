@@ -1,6 +1,14 @@
 import { connectDesignerRoto } from "./roto";
 import { createSlotDialog } from "./dialog";
 import { createEmbedDialog } from "./embedDialog";
+import {
+  importImpact,
+  libraryFileName,
+  libraryJSON,
+  librarySize,
+  parseImport,
+  type ImportResult,
+} from "./library";
 import { DEFAULT_GEOMETRY, type CustomGeometry } from "../engine/customGeometry";
 import {
   parseDesign,
@@ -322,11 +330,13 @@ function refreshShapeSelection() {
     });
 }
 const slotDialog = createSlotDialog();
-function mountBanks<T>(
+function mountBanks<T extends { name: string }>(
   navId: string,
   gridId: string,
   kind: string,
   banks: (T | null)[][],
+  userKind: "presets" | "shapes",
+  builtIns: readonly (readonly (NoInfer<T> | null)[])[],
   makeButton: (item: T) => HTMLButtonElement,
   save: (bank: number, slot: number, overwriteName?: string) => Promise<T | undefined>,
 ): () => void {
@@ -344,6 +354,25 @@ function mountBanks<T>(
     nav.append(button);
     return button;
   });
+  /** Deletes a saved slot (host + browser); the built-in it covered comes back. */
+  async function remove(bank: number, slot: number) {
+    const item = banks[bank][slot];
+    if (!item) return;
+    const builtIn = builtIns[bank][slot];
+    const confirmed = await slotDialog({
+      title: `Delete ${kind.toLowerCase()}?`,
+      description: `Delete “${item.name}” from bank ${bank + 1}, slot ${slot + 1}? ${
+        builtIn ? `The built-in “${builtIn.name}” comes back.` : "The slot becomes empty."
+      } This cannot be undone.`,
+      action: "Delete",
+    });
+    if (!confirmed) return;
+    if (!(await deleteSavedSlot(userKind, String(bank * 16 + slot)))) return;
+    banks[bank][slot] = builtIn ?? null;
+    render();
+    el("design-status").textContent =
+      `Deleted “${item.name}”.` + (builtIn ? ` Built-in “${builtIn.name}” restored.` : "");
+  }
   function render() {
     tabs.forEach((tab, bank) => tab.setAttribute("aria-pressed", String(bank === selectedBank)));
     grid.setAttribute("aria-label", `${kind} bank ${selectedBank + 1} slots`);
@@ -371,8 +400,32 @@ function mountBanks<T>(
           button.className = "lab-empty-slot";
         } else {
           const load = button.onclick;
-          button.title = `${button.title ? button.title + " · " : ""}Shift+click to replace with the current design`;
+          const bank = selectedBank;
+          const isSaved = Boolean(userSlots[userKind][String(bank * 16 + slot)]);
+          // Corner badge: hollow = built-in, filled = saved (hover shows × to delete).
+          button.classList.add(isSaved ? "slot-saved" : "slot-builtin");
+          const badge = document.createElement("span");
+          badge.className = "slot-badge";
+          badge.setAttribute("aria-hidden", "true");
+          button.append(badge);
+          const origin = isSaved
+            ? `${hostSlots ? "Saved in the host library" : "Saved in this browser"} · × or Delete key to remove`
+            : "Built-in";
+          button.title = `${button.title ? button.title + " · " : ""}${origin} · Shift+click to replace with the current design`;
+          if (isSaved) {
+            button.setAttribute("aria-keyshortcuts", "Delete");
+            button.onkeydown = (event) => {
+              if (event.key !== "Delete" && event.key !== "Backspace") return;
+              event.preventDefault();
+              void remove(bank, slot);
+            };
+          }
           button.onclick = async (event) => {
+            if (isSaved && (event.target as Element).closest(".slot-badge")) {
+              event.preventDefault();
+              void remove(bank, slot);
+              return;
+            }
             if (!event.shiftKey) {
               load?.call(button, event);
               if (kind === "Shape") {
@@ -434,7 +487,11 @@ const GENERATE_API = "api/generate";
 /** False on static hosting (e.g. GitHub Pages): AI generation needs the local dev host. */
 let aiAvailable = true;
 let hostSlots = false;
-function putHostSlot(kind: "shapes" | "presets", key: string, item: SavedShape | SavedDesign) {
+function putHostSlot(
+  kind: "shapes" | "presets",
+  key: string,
+  item: SavedShape | SavedDesign | null,
+) {
   return fetch(SLOTS_API, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
@@ -443,9 +500,17 @@ function putHostSlot(kind: "shapes" | "presets", key: string, item: SavedShape |
     if (!response.ok) throw new Error(String(response.status));
   });
 }
-function storeLocally(kind: "shapes" | "presets", key: string, item: SavedShape | SavedDesign) {
+/** Writes (or with null, removes) one slot in this browser's copy. */
+function storeLocally(
+  kind: "shapes" | "presets",
+  key: string,
+  item: SavedShape | SavedDesign | null,
+) {
   if (!storageReady) return false;
-  const next = { ...localSlots, [kind]: { ...localSlots[kind], [key]: item } };
+  const entries = { ...localSlots[kind] } as Record<string, SavedShape | SavedDesign>;
+  if (item) entries[key] = item;
+  else delete entries[key];
+  const next = { ...localSlots, [kind]: entries } as UserSlots;
   try {
     localStorage.setItem(DESIGN_STORAGE, JSON.stringify(next));
     localSlots = next;
@@ -484,11 +549,33 @@ async function persistSlot(
     (savedOnHost ? "." : " in this browser only (the host library is unavailable).");
   return true;
 }
+/** Removes a saved slot everywhere it is kept (host library and this browser's copy,
+ *  so the browser copy is never re-uploaded). */
+async function deleteSavedSlot(kind: "shapes" | "presets", key: string): Promise<boolean> {
+  if (hostSlots) {
+    try {
+      await putHostSlot(kind, key, null);
+    } catch {
+      el("design-status").textContent = "Could not delete: the host library is unavailable.";
+      return false;
+    }
+  }
+  if (!storeLocally(kind, key, null) && !hostSlots) {
+    el("design-status").textContent = "Could not delete: browser storage is unavailable.";
+    return false;
+  }
+  const entries = { ...userSlots[kind] } as Record<string, SavedShape | SavedDesign>;
+  delete entries[key];
+  userSlots = { ...userSlots, [kind]: entries } as UserSlots;
+  return true;
+}
 const renderShapeBanks = mountBanks(
   "shape-banks",
   "lab-shapes",
   "Shape",
   shapeBanks,
+  "shapes",
+  SHAPE_BANKS,
   (shape) => {
     const button = document.createElement("button");
     button.textContent = shape.name;
@@ -527,7 +614,8 @@ const renderShapeBanks = mountBanks(
     return (await persistSlot("shapes", bank, slot, shape)) ? shape : undefined;
   },
 );
-function applyLabPreset(preset: SavedDesign, preserveInput = false) {
+/** Applies a look. The audio input is left alone (default: No modulation). */
+function applyLabPreset(preset: SavedDesign) {
   setGeometry(preset.formation === 30 ? (preset.geometry ?? DEFAULT_GEOMETRY) : undefined);
   currentPalette = preset.palette;
   drive.palette = currentPalette?.flatMap((color) =>
@@ -579,16 +667,14 @@ function applyLabPreset(preset: SavedDesign, preserveInput = false) {
   el<HTMLInputElement>("journey-time").value = "75";
   el("journey-time").dispatchEvent(new Event("input"));
   el<HTMLInputElement>("cycle-audio").checked = preset.cycleAudio ?? false;
-  if (!preserveInput) {
-    input.value = "demo";
-    modeChanged();
-  }
 }
 const renderPresetBanks = mountBanks(
   "preset-banks",
   "lab-presets",
   "Preset",
   presetBanks,
+  "presets",
+  PRESET_BANKS,
   (preset) => {
     const button = document.createElement("button");
     button.id = `${preset.id}-preset`;
@@ -674,6 +760,102 @@ async function syncHostSlots() {
       .join(" ");
 }
 void syncHostSlots();
+function downloadText(text: string, fileName: string) {
+  const url = URL.createObjectURL(new Blob([text], { type: "application/json" }));
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = fileName;
+  link.click();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+el("library-export").onclick = () => {
+  const count = librarySize(userSlots);
+  if (!count) {
+    el("design-status").textContent = "Nothing saved yet: save a preset or shape first.";
+    return;
+  }
+  downloadText(libraryJSON(userSlots), libraryFileName());
+  el("design-status").textContent =
+    `Exported ${count} saved slot${count === 1 ? "" : "s"}. Import the file here or in another browser.`;
+};
+el("library-import").onclick = () => el("library-file").click();
+el<HTMLInputElement>("library-file").onchange = async (event) => {
+  const picker = event.target as HTMLInputElement;
+  const file = picker.files?.[0];
+  picker.value = "";
+  if (!file) return;
+  let result: ImportResult;
+  try {
+    result = parseImport(JSON.parse(await file.text()));
+  } catch (error) {
+    el("design-status").textContent =
+      `Could not import ${file.name}: ${error instanceof Error ? error.message : "invalid file"}`;
+    return;
+  }
+  if (result.type === "look") {
+    const design = result.design;
+    if (!(await geometryReady(design.formation === 30 ? design.geometry : undefined))) return;
+    commitDesign();
+    applyLabPreset(design);
+    commitDesign();
+    el("design-status").textContent =
+      `Imported “${design.name}”. Click an empty preset slot to save it.`;
+    return;
+  }
+  const incoming = result.slots;
+  const count = librarySize(incoming);
+  if (!count) {
+    el("design-status").textContent = `${file.name} has no saved slots.`;
+    return;
+  }
+  const presets = Object.keys(incoming.presets).length,
+    shapes = Object.keys(incoming.shapes).length;
+  const impact = importImpact(userSlots, incoming, {
+    presets: PRESET_BANKS.flat(),
+    shapes: SHAPE_BANKS.flat(),
+  });
+  const confirmed = await slotDialog({
+    title: "Import library?",
+    description:
+      `${file.name}: ${presets} preset${presets === 1 ? "" : "s"} and ${shapes} shape${shapes === 1 ? "" : "s"}, into the same banks and slots.` +
+      (impact.replacesSaved
+        ? ` ${impact.replacesSaved} will replace slot${impact.replacesSaved === 1 ? "" : "s"} you already saved.`
+        : "") +
+      (impact.coversBuiltIn
+        ? ` ${impact.coversBuiltIn} will cover built-in slot${impact.coversBuiltIn === 1 ? "" : "s"} (delete them later to bring the built-ins back).`
+        : ""),
+    action: "Import",
+  });
+  if (!confirmed) return;
+  let failed = 0;
+  for (const kind of ["presets", "shapes"] as const) {
+    const banks: (SavedShape | SavedDesign | null)[][] =
+      kind === "presets" ? presetBanks : shapeBanks;
+    for (const [key, item] of Object.entries(incoming[kind]) as [
+      string,
+      SavedShape | SavedDesign,
+    ][]) {
+      let savedOnHost = false;
+      if (hostSlots)
+        savedOnHost = await putHostSlot(kind, key, item).then(
+          () => true,
+          () => false,
+        );
+      if (!storeLocally(kind, key, item) && !savedOnHost) {
+        failed++;
+        continue;
+      }
+      userSlots = { ...userSlots, [kind]: { ...userSlots[kind], [key]: item } } as UserSlots;
+      banks[Math.floor(Number(key) / 16)][Number(key) % 16] = item;
+    }
+  }
+  renderPresetBanks();
+  renderShapeBanks();
+  warmSavedGeometries();
+  el("design-status").textContent =
+    `Imported ${count - failed} of ${count} slot${count === 1 ? "" : "s"} ${hostSlots ? "into the host library" : "into this browser"}.` +
+    (failed ? ` ${failed} could not be saved.` : "");
+};
 function prepareAnalyser() {
   context ??= new AudioContext();
   if (!analyser) {
@@ -1245,7 +1427,7 @@ function restoreDesign(value: AuthoringState | undefined) {
   if (!value) return;
   restoring = true;
   try {
-    applyLabPreset(value.design, true);
+    applyLabPreset(value.design);
     systems.value = value.systems;
     updateSystems();
     el<HTMLInputElement>("input-gain").value = String(value.gain);
@@ -1297,6 +1479,18 @@ window.addEventListener("keydown", (event) => {
     restoreDesign(event.shiftKey ? designHistory.redo() : designHistory.undo());
   }
 });
+/** The Designer opens on Galaxy drift (Preset bank 1, slot 2), shown at once. */
+const STARTUP_PRESET = { id: "galaxy-drift", bank: 0, slot: 1 };
+const startupLook = PRESET_BANKS[STARTUP_PRESET.bank][STARTUP_PRESET.slot];
+if (startupLook?.id === STARTUP_PRESET.id) {
+  applyLabPreset(startupLook);
+  selectionTransition = undefined;
+  drive.formation = formation;
+  drive.formationWeights = Array.from(
+    { length: PARTICLE_FORMATION_COUNT },
+    (_, i) => customWeights?.[i] ?? Number(i === formation),
+  );
+}
 commitDesign();
 const PROMPT_HISTORY_KEY = "particles-designer.prompts.v1";
 let promptHistory: string[] = [];
@@ -1412,7 +1606,7 @@ el<HTMLFormElement>("design-prompt").onsubmit = async (event) => {
     const design = parseDesign(data.design);
     await geometryReady(design.formation === 30 ? design.geometry : undefined);
     commitDesign(); // Preserve edits made while waiting too.
-    applyLabPreset(design, true);
+    applyLabPreset(design);
     commitDesign();
     el<HTMLTextAreaElement>("design-request").value = "";
     if (inspiration === image) setInspiration(undefined);
@@ -1506,7 +1700,10 @@ el("design-toggle").addEventListener("click", () => {
 
 // MIDI uses the same UI edit handlers and authoring history as pointer edits.
 // Candidate browsing is local navigation; empty slots never invoke Save.
-const rotoCandidate = { preset: { bank: 0, slot: 0 }, shape: { bank: 0, slot: 0 } };
+const rotoCandidate = {
+  preset: { bank: STARTUP_PRESET.bank, slot: STARTUP_PRESET.slot },
+  shape: { bank: 0, slot: 0 },
+};
 let designerBlackout = false;
 const blackoutButton = document.createElement("button");
 blackoutButton.id = "designer-blackout";

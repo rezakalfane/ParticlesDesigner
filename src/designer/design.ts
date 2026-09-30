@@ -204,7 +204,8 @@ export type UserSlots = {
   presets: Record<string, SavedDesign>;
   shapes: Record<string, SavedShape>;
 };
-const SLOT_KEY = /^(?:[0-9]|[1-5][0-9]|6[0-3])$/;
+/** Slot keys are bank * 16 + slot: "0".."63". */
+export const SLOT_KEY = /^(?:[0-9]|[1-5][0-9]|6[0-3])$/;
 export type SlotKind = keyof Omit<UserSlots, "version">;
 /** Validates one saved slot (throws on invalid data). */
 export function parseSlotItem(kind: "presets", key: string, value: unknown): SavedDesign;

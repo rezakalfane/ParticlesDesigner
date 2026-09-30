@@ -60,6 +60,15 @@ describe("embed looks", () => {
     expect(state.drive.density).toBe(0.7);
     expect(state.rotation.y).toBe(0.15);
   });
+  it("every factory look is performable: audio, ripple and cycle on with real strengths", () => {
+    for (const look of LOOKS) {
+      const state = lookState(look);
+      expect(state.groups, look.id).toMatchObject({ audio: true, shock: true, cycle: true });
+      expect(state.reactivity, look.id).toBeGreaterThan(0);
+      expect(state.drive.shock, look.id).toBeGreaterThan(0);
+      expect(state.cycle.implosion * state.cycle.explosion, look.id).toBeGreaterThan(0);
+    }
+  });
   it("every factory look produces a finite drive", () => {
     for (const look of LOOKS) {
       const { drive } = lookState(look);

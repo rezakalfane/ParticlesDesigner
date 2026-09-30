@@ -30,7 +30,7 @@
 new ParticleField("#particles", {
   look: "electric-bloom",
   audio: "microphone",
-  audioDepth: 1.2, // most factory looks ship with Audio depth 0
+  audioDepth: 1.2, // optional: overrides the look's Audio depth
 });
 field.setAudio(document.querySelector("audio")); // keeps playing through the speakers
 field.setAudio("manual");
@@ -45,7 +45,7 @@ field.setAudioLevels({ low: 0.8, mid: 0.3, high: 0.1, transient: 0.9 }); // your
     <script type="module">
       import { ParticleField } from "../dist-embed/particles-designer.js";
 
-      // Most factory looks ship with Audio depth 0: audioDepth makes any look react.
+      // audioDepth is optional (every factory look reacts); here it drives the Depth slider.
       const field = new ParticleField("#particles", {
         look: "electric-bloom",
         audio: "demo",

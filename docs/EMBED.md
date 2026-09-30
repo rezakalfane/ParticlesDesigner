@@ -172,10 +172,10 @@ half-applied.
 Bands are low 20–250 Hz (expansion), mid 250–4000 Hz (twist), high 4–16 kHz
 (point size), plus a transient (rising low) that launches ripples and, when the
 look enables it, the collapse cycle. The look's **Audio depth** scales the
-response. **Most factory looks ship with Audio depth 0 or their audio switched
-off** (they were authored as visuals), so pass `audioDepth: 1` (attribute
-`audio-depth="1"`) to make any look react, or raise it in the Designer before
-exporting.
+response. Every factory look is audio-reactive (Audio depth at least 1) and can
+fire ripples and the collapse cycle; nothing moves until you choose an `audio`
+input. `audioDepth` (attribute `audio-depth`) overrides a look's depth, e.g. to
+calm a look down or to make your own design with depth 0 react.
 
 - Browsers start audio suspended; the kit resumes it on the first click, key
   press or media `play`.

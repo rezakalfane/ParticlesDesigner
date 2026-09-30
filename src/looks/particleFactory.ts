@@ -1,4 +1,4 @@
-import { PARTICLE_LOOKS, type ParticleLook } from "./particleLooks";
+import { PARTICLE_LOOKS, performable, type ParticleLook } from "./particleLooks";
 import { PARTICLE_STUDIES } from "./particleStudies";
 import { BAKED_LOOK_SLOTS } from "./particleBakedLooks";
 
@@ -17,6 +17,7 @@ export const PARTICLE_FACTORY_SLOTS: readonly (ParticleLook | null)[] = (() => {
     { length: PARTICLE_FACTORY_CAPACITY },
     (_, i) => looks[i] ?? null,
   );
-  for (const [key, look] of Object.entries(BAKED_LOOK_SLOTS)) slots[Number(key)] = look;
+  for (const [key, look] of Object.entries(BAKED_LOOK_SLOTS))
+    slots[Number(key)] = performable(look);
   return slots;
 })();

@@ -22,7 +22,9 @@
     "visualizer",
     "shader",
     "animation",
-    "background"
+    "background",
+    "roto-control",
+    "midi"
   ],
   "exports": {
     ".": {
@@ -35,7 +37,8 @@
   "jsdelivr": "./dist-embed/particles-designer.iife.js",
   "unpkg": "./dist-embed/particles-designer.iife.js",
   "files": [
-    "dist-embed"
+    "dist-embed",
+    "roto/*.json"
   ],
   "publishConfig": {
     "access": "public"
