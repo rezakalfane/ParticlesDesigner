@@ -25,6 +25,15 @@
       <div class="intro">
         A sculpture made of light.<br />Play its shape, then let sound move it.
       </div>
+      <div class="library-actions" role="group" aria-label="Saved presets and shapes">
+        <button id="library-import" type="button" title="Import a library or a single look (JSON)">
+          Import…
+        </button>
+        <button id="library-export" type="button" title="Download every saved preset and shape">
+          Export library
+        </button>
+        <input id="library-file" type="file" accept=".json,application/json" hidden />
+      </div>
       <fieldset>
         <legend>Presets</legend>
         <p class="hint">Load a complete look: shape, colors, motion, lighting and viewpoint.</p>
@@ -34,19 +43,6 @@
           <span class="slot-dot slot-dot-saved"></span> saved
           <span class="slot-dot"></span> built-in · hover a saved slot for × to delete
         </p>
-        <div class="library-actions">
-          <button
-            id="library-import"
-            type="button"
-            title="Import a library or a single look (JSON)"
-          >
-            Import…
-          </button>
-          <button id="library-export" type="button" title="Download every saved preset and shape">
-            Export library
-          </button>
-          <input id="library-file" type="file" accept=".json,application/json" hidden />
-        </div>
       </fieldset>
       <fieldset class="control-group">
         <legend>Shapes</legend>
