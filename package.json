@@ -1,22 +1,45 @@
 {
-  "name": "particles-designer",
+  "name": "@absolumont/particles-designer",
   "version": "0.1.0",
-  "private": true,
   "type": "module",
-  "description": "ABSOLUMONT Particles Designer \u2014 author GPU particle fields (WebGL2) with presets, shapes, AI prompts and ROTO-CONTROL.",
+  "description": "Luminous GPU particle fields for any web page: <particle-field> element and ParticleField API, with the Particles Designer (WebGL2, audio-reactive, AI-authored looks).",
   "author": "Reza Kalfane, Absolumont Collective",
   "license": "MIT",
+  "homepage": "https://rezakalfane.github.io/ParticlesDesigner/",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rezakalfane/ParticlesDesigner.git"
+  },
+  "bugs": {
+    "url": "https://github.com/rezakalfane/ParticlesDesigner/issues"
+  },
+  "keywords": [
+    "particles",
+    "webgl2",
+    "web-component",
+    "audio-reactive",
+    "generative",
+    "visualizer",
+    "shader",
+    "animation",
+    "background"
+  ],
   "exports": {
     ".": {
       "types": "./dist-embed/types/embed/index.d.ts",
       "import": "./dist-embed/particles-designer.js"
     }
   },
+  "module": "./dist-embed/particles-designer.js",
+  "types": "./dist-embed/types/embed/index.d.ts",
+  "jsdelivr": "./dist-embed/particles-designer.iife.js",
+  "unpkg": "./dist-embed/particles-designer.iife.js",
   "files": [
-    "dist-embed",
-    "README.md",
-    "LICENSE"
+    "dist-embed"
   ],
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "dev": "vite --host",
     "build": "tsc --noEmit && vite build",
@@ -32,7 +55,8 @@
     "roto:presets": "tsx scripts/generate-roto-presets.ts",
     "bake": "tsx scripts/bake-library.ts",
     "rehearse:roto": "node scripts/rehearse-roto.mjs",
-    "rehearse:embed": "node scripts/rehearse-embed.mjs"
+    "rehearse:embed": "node scripts/rehearse-embed.mjs",
+    "prepublishOnly": "npm run verify"
   },
   "devDependencies": {
     "@types/node": "^26.6.0",

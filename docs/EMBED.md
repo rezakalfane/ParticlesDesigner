@@ -10,7 +10,32 @@ rotation, attractors, cycle, audio response and transitions between looks.
 - **Formats:** ES module, classic script (global `ParticlesDesigner`), and a
   `<particle-field>` element. Types are included.
 
-## Build
+## Install
+
+From the https://cdn.jsdelivr.net/npm/@absolumont/particles-designer@0.1/dist-embed, no build step:
+
+```html
+<!-- ES module (also registers <particle-field>) -->
+<script
+  type="module"
+  src="https://cdn.jsdelivr.net/npm/@absolumont/particles-designer@0.1/dist-embed/particles-designer.js"
+></script>
+<!-- or a classic script: global `ParticlesDesigner` -->
+<script src="https://cdn.jsdelivr.net/npm/@absolumont/particles-designer@0.1/dist-embed/particles-designer.iife.js"></script>
+```
+
+`@0.1` follows the latest 0.1.x release; pin an exact version (`@0.1.0`) for
+production. From npm, for bundlers:
+
+```sh
+npm install @absolumont/particles-designer
+```
+
+```js
+import { ParticleField } from "@absolumont/particles-designer";
+```
+
+## Build from source
 
 ```sh
 npm run build:embed   # → dist-embed/particles-designer.js (ESM)
@@ -19,15 +44,17 @@ npm run build:embed   # → dist-embed/particles-designer.js (ESM)
 npm run examples      # builds, then opens http://localhost:5180/examples/
 ```
 
-Copy the `.js` file you need next to your page. The package isn't published to npm
-yet; `package.json` already declares `exports` for when it is.
+Self-hosting: copy the `.js` file you need next to your page.
 
 ## Three ways to embed
 
 ### 1. The element (no JavaScript)
 
 ```html
-<script type="module" src="particles-designer.js"></script>
+<script
+  type="module"
+  src="https://cdn.jsdelivr.net/npm/@absolumont/particles-designer@0.1/dist-embed/particles-designer.js"
+></script>
 
 <particle-field look="deep-sea" style="width: 100%; height: 480px"></particle-field>
 ```
@@ -65,7 +92,7 @@ sets a design directly. Errors dispatch a cancelable `particle-field-error` even
 ### 2. ES module
 
 ```js
-import { ParticleField } from "./particles-designer.js";
+import { ParticleField } from "@absolumont/particles-designer";
 
 const field = new ParticleField("#hero", { look: "galaxy-drift", interactive: true });
 ```
@@ -73,7 +100,7 @@ const field = new ParticleField("#hero", { look: "galaxy-drift", interactive: tr
 ### 3. Classic script
 
 ```html
-<script src="particles-designer.iife.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@absolumont/particles-designer@0.1/dist-embed/particles-designer.iife.js"></script>
 <script>
   new ParticlesDesigner.ParticleField("#hero", { look: "northern-lights" });
 </script>
@@ -120,7 +147,7 @@ appended), or a CSS selector. **Give the container a size.**
 ### Looks
 
 ```js
-import { LOOKS, resolveLook, fetchLook } from "./particles-designer.js";
+import { LOOKS, resolveLook, fetchLook } from "@absolumont/particles-designer";
 
 LOOKS.map((look) => look.id); // every factory look, in bank order
 resolveLook("Galaxy drift"); // id, name (any case), object or JSON → validated design

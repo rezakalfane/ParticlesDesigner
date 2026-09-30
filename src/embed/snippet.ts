@@ -1,6 +1,10 @@
 /** Paste-ready HTML for a design (used by the Designer's Embed dialog). Pure. */
 import type { Look } from "./look";
 
+/** The published kit on jsDelivr (npm @absolumont/particles-designer, latest 0.1.x). */
+export const KIT_CDN =
+  "https://cdn.jsdelivr.net/npm/@absolumont/particles-designer@0.1/dist-embed/particles-designer.js";
+
 /** The design as a portable JSON document (no runtime id; view rounded to 0.01). */
 export function lookJSON(look: Look): string {
   const { id: _id, ...design } = look;
@@ -9,7 +13,7 @@ export function lookJSON(look: Look): string {
 }
 
 /** A <particle-field> with the design inline; "</" is escaped so the JSON cannot close the script. */
-export function embedSnippet(look: Look, src = "particles-designer.js"): string {
+export function embedSnippet(look: Look, src = KIT_CDN): string {
   const json = lookJSON(look).replace(/<\//g, "<\\/").replace(/\n/g, "\n    ");
   return `<!-- Particles Designer · ${look.name.replace(/--/g, "—")} -->
 <script type="module" src="${src}"></script>

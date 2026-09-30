@@ -8,8 +8,7 @@ export function createEmbedDialog() {
   dialog.setAttribute("aria-labelledby", "embed-dialog-title");
   dialog.innerHTML = `<form method="dialog">
     <h2 id="embed-dialog-title">Embed this look</h2>
-    <p>Paste into any page, next to the embed kit (<code>npm run build:embed</code> →
-    <code>dist-embed/particles-designer.js</code>). Or download the design and load it with
+    <p>Paste into any page: the kit loads from the jsDelivr CDN. Or download the design and load it with
     <code>&lt;particle-field src="…"&gt;</code> or <code>fetchLook()</code>.</p>
     <textarea readonly spellcheck="false" aria-label="Embed snippet"></textarea>
     <div class="slot-dialog-actions">

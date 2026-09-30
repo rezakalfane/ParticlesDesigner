@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { DEFAULT_LOOK, LOOKS, lookState, resolveLook } from "../src/embed/look";
-import { embedSnippet, lookJSON } from "../src/embed/snippet";
+import { embedSnippet, KIT_CDN, lookJSON } from "../src/embed/snippet";
 import { PARTICLE_FACTORY_SLOTS } from "../src/looks/particleFactory";
 import { parseDesign } from "../src/designer/design";
 
@@ -71,6 +71,14 @@ describe("embed looks", () => {
 });
 
 describe("embed snippet", () => {
+  it("loads the published kit matching this package's minor version", () => {
+    const pkg = JSON.parse(readFileSync("package.json", "utf8"));
+    const minor = pkg.version.split(".").slice(0, 2).join(".");
+    expect(KIT_CDN).toBe(
+      `https://cdn.jsdelivr.net/npm/${pkg.name}@${minor}/dist-embed/particles-designer.js`,
+    );
+    expect(embedSnippet(resolveLook("deep-sea"))).toContain(`src="${KIT_CDN}"`);
+  });
   it("round-trips the design through inline JSON and escapes </script>", () => {
     const look = { ...resolveLook(bloom), description: "Ends here </script><b>x</b>" };
     const html = embedSnippet(look);

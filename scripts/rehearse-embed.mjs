@@ -143,8 +143,9 @@ try {
   errors.length = 0;
   await blank.goto(new URL("examples/index.html", base).href); // same origin, no scripts
   await blank.setContent(
+    // The snippet loads the kit from the CDN; test the local build instead.
     snippet.replace(
-      'src="particles-designer.js"',
+      /src="https:\/\/cdn\.jsdelivr\.net\/[^"]+\/particles-designer\.js"/,
       `src="${new URL("dist-embed/particles-designer.js", base).href}"`,
     ),
   );

@@ -1,6 +1,6 @@
 # Particles Designer
 
-<a href="https://rezakalfane.github.io/ParticlesDesigner/"><img src="docs/media/looks.webp" alt="Particle looks morphing: Deep sea, Galaxy drift, Neon weave" width="720"></a>
+<a href="https://rezakalfane.github.io/ParticlesDesigner/"><img src="https://raw.githubusercontent.com/rezakalfane/ParticlesDesigner/main/docs/media/looks.webp" alt="Particle looks morphing: Deep sea, Galaxy drift, Neon weave" width="720"></a>
 
 **ABSOLUMONT / Particles Designer** — author luminous GPU particle fields in the
 browser: 1k–200k procedural WebGL2 points forming built-in, baked or AI-invented
@@ -17,7 +17,7 @@ Originally built inside LUMEN; this repository is the standalone tool.
 hosted Designer runs fully in the browser: saved slots stay in that browser, and AI
 generation needs the local host (below).
 
-![The Designer: preset banks, shapes, controls and the AI prompt bar](docs/media/designer.webp)
+![The Designer: preset banks, shapes, controls and the AI prompt bar](https://raw.githubusercontent.com/rezakalfane/ParticlesDesigner/main/docs/media/designer.webp)
 
 ## Quick start
 
@@ -46,12 +46,16 @@ shares them. Browser storage is the fallback when no host is available.
 ## Embed a look in any web page
 
 ```html
-<script type="module" src="particles-designer.js"></script>
+<script
+  type="module"
+  src="https://cdn.jsdelivr.net/npm/@absolumont/particles-designer@0.1/dist-embed/particles-designer.js"
+></script>
 <particle-field look="deep-sea" style="width: 100%; height: 480px"></particle-field>
 ```
 
 ```js
-import { ParticleField } from "./particles-designer.js";
+// npm install @absolumont/particles-designer
+import { ParticleField } from "@absolumont/particles-designer";
 const field = new ParticleField("#hero", {
   look: "galaxy-drift",
   audio: "microphone",
@@ -60,9 +64,10 @@ const field = new ParticleField("#hero", {
 ```
 
 In the Designer, **Embed** copies a ready-to-paste snippet of the current look or
-downloads it as JSON. `npm run build:embed` builds the kit (about 30 KB gzipped,
-no dependencies) and `npm run examples` opens the sample pages. See
-[docs/EMBED.md](docs/EMBED.md).
+downloads it as JSON. The kit is about 30 KB gzipped with no dependencies, on npm
+as [`@absolumont/particles-designer`](https://www.npmjs.com/package/@absolumont/particles-designer)
+and on jsDelivr. See [docs/EMBED.md](https://github.com/rezakalfane/ParticlesDesigner/blob/main/docs/EMBED.md) and the
+[live examples](https://rezakalfane.github.io/ParticlesDesigner/examples/).
 
 ## Scripts
 
@@ -110,4 +115,4 @@ clock, DOM or audio.
 
 ## License
 
-[MIT](LICENSE) © 2026 Reza Kalfane, Absolumont Collective
+[MIT](https://github.com/rezakalfane/ParticlesDesigner/blob/main/LICENSE) © 2026 Reza Kalfane, Absolumont Collective
