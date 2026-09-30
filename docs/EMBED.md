@@ -78,8 +78,8 @@ or load a downloaded design file: `<particle-field src="/looks/my-look.json">`.
 | `audio`         | `none` (default), `demo`, `microphone`, or a CSS selector of an `<audio>`/`<video>` |
 | `audio-gain`    | Input gain before the look's Audio depth (default 1)                                |
 | `audio-depth`   | Overrides the look's Audio depth (0–2) and turns its audio response on              |
-| `interactive`   | Drag to orbit                                                                       |
-| `zoom`          | Wheel zoom (captures page scrolling over the field)                                 |
+| `interactive`   | Drag to orbit, Shift/right-drag or two-finger twist to roll, double-click to reset  |
+| `zoom`          | Wheel, trackpad pinch and two-finger pinch zoom (captures page scrolling)           |
 | `paused`        | Frozen frame; remove the attribute to play                                          |
 | `max-particles` | Particle ceiling (default 200000)                                                   |
 | `pixel-ratio`   | Highest device pixel ratio (default 1.5)                                            |
@@ -113,21 +113,21 @@ const field = new ParticleField("#hero", { look: "galaxy-drift", interactive: tr
 `target` is a `<canvas>` (used as is), any other element (a canvas filling it is
 appended), or a CSS selector. **Give the container a size.**
 
-| Option              | Default         | Meaning                                                            |
-| ------------------- | --------------- | ------------------------------------------------------------------ |
-| `look`              | `"deep-sea"`    | Factory id or name, a design object, or design JSON text           |
-| `audio`             | `"none"`        | See [Audio](#audio)                                                |
-| `audioGain`         | `1`             | Input gain applied before the look's Audio depth                   |
-| `audioDepth`        | the look's      | Overrides Audio depth (0–2) and turns the look's audio response on |
-| `interactive`       | `false`         | Drag to orbit the camera                                           |
-| `zoom`              | `false`         | Wheel/trackpad zoom (captures scrolling over the field)            |
-| `maxParticles`      | `200000`        | Ceiling; denser looks are capped                                   |
-| `pixelRatio`        | `1.5`           | Highest device pixel ratio used                                    |
-| `maxResolution`     | `[1920, 1080]`  | Canvas size ceiling in device pixels                               |
-| `autoplay`          | `true`          | `false` under `prefers-reduced-motion` (a still frame is shown)    |
-| `pauseWhenHidden`   | `true`          | No rendering while offscreen or in a background tab                |
-| `transitionSeconds` | `1.8`           | Look-to-look transition                                            |
-| `onError`           | `console.error` | Rendering, geometry or audio errors                                |
+| Option              | Default         | Meaning                                                                                           |
+| ------------------- | --------------- | ------------------------------------------------------------------------------------------------- |
+| `look`              | `"deep-sea"`    | Factory id or name, a design object, or design JSON text                                          |
+| `audio`             | `"none"`        | See [Audio](#audio)                                                                               |
+| `audioGain`         | `1`             | Input gain applied before the look's Audio depth                                                  |
+| `audioDepth`        | the look's      | Overrides Audio depth (0–2) and turns the look's audio response on                                |
+| `interactive`       | `false`         | Drag to orbit (screen space), Shift/right-drag or two-finger twist to roll, double-click to reset |
+| `zoom`              | `false`         | Wheel, trackpad pinch and two-finger pinch zoom (captures scrolling over the field)               |
+| `maxParticles`      | `200000`        | Ceiling; denser looks are capped                                                                  |
+| `pixelRatio`        | `1.5`           | Highest device pixel ratio used                                                                   |
+| `maxResolution`     | `[1920, 1080]`  | Canvas size ceiling in device pixels                                                              |
+| `autoplay`          | `true`          | `false` under `prefers-reduced-motion` (a still frame is shown)                                   |
+| `pauseWhenHidden`   | `true`          | No rendering while offscreen or in a background tab                                               |
+| `transitionSeconds` | `1.8`           | Look-to-look transition                                                                           |
+| `onError`           | `console.error` | Rendering, geometry or audio errors                                                               |
 
 | Member                                          | Meaning                                                                                              |
 | ----------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
@@ -138,6 +138,7 @@ appended), or a CSS selector. **Give the container a size.**
 | `ripple()`                                      | Launch a shockwave (if the look enables shockwaves)                                                  |
 | `cycle()`                                       | Collapse → explode → reform. `false` if disabled, paused or already running                          |
 | `play()` / `pause()` / `paused`                 | Motion; a paused field keeps its frame and stays draggable                                           |
+| `resetView()`                                   | Camera back to the look's viewpoint (double-click does this when `interactive`)                      |
 | `look`                                          | The current design                                                                                   |
 | `audioStatus`                                   | E.g. `"Listening to the microphone"`, `"Microphone access denied"`                                   |
 | `particleCount`                                 | Particles drawn in the last frame                                                                    |

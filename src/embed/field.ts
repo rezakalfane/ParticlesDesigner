@@ -7,6 +7,7 @@
 import { ParticleRenderer, PARTICLE_FORMATION_COUNT, type ParticleDrive } from "../engine/renderer";
 import { ParticleCycle } from "../engine/particleCycle";
 import { DEFAULT_GEOMETRY, type CustomGeometry } from "../engine/customGeometry";
+import { attachViewGestures } from "../engine/viewGestures";
 import { AudioDriver, type AudioInput, type AudioLevels } from "./audio";
 import {
   DEFAULT_LOOK,
@@ -25,13 +26,16 @@ export interface ParticleFieldOptions {
   /** Input gain applied to audio levels before the look's Audio depth. Default 1. */
   audioGain?: number;
   /**
-   * Overrides the look's Audio depth (0..2) and switches its audio response on.
-   * Most factory looks ship with depth 0; set e.g. 1 to make any look react. Default: the look's.
+   * Overrides the look's Audio depth (0..2) and switches its audio response on
+   * (every factory look already reacts; use this to tune or silence it). Default: the look's.
    */
   audioDepth?: number;
-  /** Drag to orbit the camera. Default false. */
+  /**
+   * Drag to orbit the camera (in screen space), Shift/right-drag or two-finger twist to
+   * roll, double-click to return to the look's viewpoint. Default false.
+   */
   interactive?: boolean;
-  /** Mouse wheel / trackpad zooms (captures page scrolling over the field). Default false. */
+  /** Wheel, trackpad pinch and two-finger pinch zoom (captures page scrolling over the field). Default false. */
   zoom?: boolean;
   /** Particle ceiling; looks above it are capped. Default 200,000. */
   maxParticles?: number;
@@ -98,7 +102,7 @@ export class ParticleField {
   private isPaused: boolean;
   private visible = true;
   private dirty = true;
-  private pointer?: { x: number; y: number };
+  private dragging = false;
   private lookRequest = 0;
   private readonly ownsCanvas: boolean;
   private readonly cleanup: (() => void)[] = [];
@@ -253,6 +257,12 @@ export class ParticleField {
     this.last = performance.now();
     this.schedule();
   }
+  /** Returns the camera to the current look's own viewpoint (also: double-click). */
+  resetView(): void {
+    const { yaw, pitch, roll, distance } = this.state.drive;
+    Object.assign(this.drive, { yaw, pitch, roll, distance });
+    this.dirty = true;
+  }
   /** Freezes motion; the last frame stays visible and the camera can still be dragged. */
   pause(): void {
     this.isPaused = true;
@@ -339,39 +349,36 @@ export class ParticleField {
       this.dirty = true;
       this.schedule();
     });
-    if (this.options.interactive) {
-      canvas.style.touchAction = "none";
-      canvas.style.cursor = "grab";
-      this.on<PointerEvent>(canvas, "pointerdown", (e) => {
-        this.pointer = { x: e.clientX, y: e.clientY };
-        canvas.setPointerCapture(e.pointerId);
-        canvas.style.cursor = "grabbing";
-      });
-      this.on<PointerEvent>(canvas, "pointermove", (e) => {
-        if (!this.pointer) return;
-        this.drive.yaw += (e.clientX - this.pointer.x) * 0.005;
-        this.drive.pitch += (e.clientY - this.pointer.y) * 0.005;
-        this.pointer = { x: e.clientX, y: e.clientY };
-        this.dirty = true;
-      });
-      const release = () => {
-        this.pointer = undefined;
-        canvas.style.cursor = "grab";
-      };
-      this.on(canvas, "pointerup", release);
-      this.on(canvas, "pointercancel", release);
-    }
-    if (this.options.zoom)
-      this.on<WheelEvent>(
-        canvas,
-        "wheel",
-        (e) => {
-          e.preventDefault();
-          this.drive.distance = Math.max(3, Math.min(8, this.drive.distance + e.deltaY * 0.003));
-          this.dirty = true;
-        },
-        { passive: false },
+    if (this.options.interactive || this.options.zoom) {
+      // Drag: orbit in screen space · Shift/right-drag or two-finger twist: roll ·
+      // wheel or pinch: zoom · double-click: back to the look's viewpoint.
+      if (this.options.interactive) canvas.style.cursor = "grab";
+      this.cleanup.push(
+        attachViewGestures(canvas, {
+          orbit: this.options.interactive,
+          zoom: this.options.zoom,
+          get: () => ({
+            yaw: this.drive.yaw,
+            pitch: this.drive.pitch,
+            roll: this.drive.roll,
+            distance: this.drive.distance,
+          }),
+          set: (view) => {
+            Object.assign(this.drive, view);
+            this.dirty = true;
+          },
+          onStart: () => {
+            this.dragging = true;
+            if (this.options.interactive) canvas.style.cursor = "grabbing";
+          },
+          onEnd: () => {
+            this.dragging = false;
+            if (this.options.interactive) canvas.style.cursor = "grab";
+          },
+          onReset: () => this.resetView(),
+        }),
       );
+    }
   }
 
   private resize(): void {
@@ -444,7 +451,7 @@ export class ParticleField {
       drive.high += (high * reactivity - drive.high) * smoothing;
       this.burst *= Math.exp(-dt * 2.8);
       drive.ripple += (Math.max(this.burst, transient * reactivity) - drive.ripple) * smoothing;
-      if (!this.pointer && groups.motion) {
+      if (!this.dragging && groups.motion) {
         const turn = dt * 0.6;
         drive.pitch = (drive.pitch + turn * state.rotation.x) % (Math.PI * 2);
         drive.yaw = (drive.yaw + turn * state.rotation.y) % (Math.PI * 2);

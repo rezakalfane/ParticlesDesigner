@@ -48,7 +48,7 @@ History warms in smoothly. Pause freezes the complete sculpture, including
 tails; backward clock jumps or gaps over 500 ms clear history. Higher Trail costs
 more GPU work; measure under show load.
 
-- 1–9: formation; drag: orbit; scroll: zoom; Space: ripple; H: controls; F: fullscreen.
+- 1–9: formation; drag: orbit (in screen space, whatever the tilt or roll); Shift+drag, right-drag or two-finger twist: roll; scroll or pinch: zoom; double-click: back to the look's viewpoint; Space: ripple; H: controls; F: fullscreen.
 - Automatic shape journey slowly morphs through vortex, orbital, tidal and helix
   then back. Journey time sets a full round trip to 10–180 preview seconds
   (default 75); lower is faster. It is independent of Motion speed, holds while

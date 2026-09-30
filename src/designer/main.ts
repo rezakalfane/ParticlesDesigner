@@ -36,6 +36,7 @@ import {
   type ParticleDrive,
 } from "../engine/renderer";
 import { ParticleCycle } from "../engine/particleCycle";
+import { attachViewGestures, type CameraView } from "../engine/viewGestures";
 
 /** The journey sweeps the built-in shapes and the live custom field, not baked formulas. */
 const JOURNEY_LAST_FORMATION = 30;
@@ -82,6 +83,8 @@ const drive: ParticleDrive = {
   distance: 4.2,
 };
 let selectedShapeSlot: number | undefined = 0;
+/** The current look's own viewpoint (double-click on the canvas returns to it). */
+let lookView: CameraView = { yaw: 0, pitch: 0.65, roll: 0, distance: 4.2 };
 let customWeights: number[] | undefined;
 let customGeometry: CustomGeometry | undefined;
 let currentPalette: string[] | undefined;
@@ -679,6 +682,7 @@ function applyLabPreset(preset: SavedDesign) {
   drive.pitch = (preset.view[1] * Math.PI) / 180;
   drive.roll = (preset.view[2] * Math.PI) / 180;
   drive.distance = preset.view[3];
+  lookView = { yaw: drive.yaw, pitch: drive.pitch, roll: drive.roll, distance: drive.distance };
   syncViewControls();
   el<HTMLInputElement>("journey-time").value = "75";
   el("journey-time").dispatchEvent(new Event("input"));
@@ -1019,26 +1023,22 @@ window.addEventListener("keydown", (event) => {
     commitDesign();
   }
 });
-let pointer: { x: number; y: number } | undefined;
-canvas.onpointerdown = (e) => {
-  pointer = { x: e.clientX, y: e.clientY };
-  canvas.setPointerCapture(e.pointerId);
-};
-canvas.onpointermove = (e) => {
-  if (!pointer) return;
-  drive.yaw += (e.clientX - pointer.x) * 0.005;
-  drive.pitch += (e.clientY - pointer.y) * 0.005;
-  pointer = { x: e.clientX, y: e.clientY };
-};
-canvas.onpointerup = canvas.onpointercancel = () => (pointer = undefined);
-canvas.addEventListener(
-  "wheel",
-  (e) => {
-    e.preventDefault();
-    drive.distance = Math.max(3, Math.min(8, drive.distance + e.deltaY * 0.003));
+/** True while the view is being dragged: auto-rotation holds so the gesture is exact. */
+let dragging = false;
+// Drag: orbit in screen space · Shift/right-drag or two-finger twist: roll ·
+// wheel or pinch: zoom · double-click: back to the look's viewpoint.
+attachViewGestures(canvas, {
+  get: () => ({ yaw: drive.yaw, pitch: drive.pitch, roll: drive.roll, distance: drive.distance }),
+  set: (view) => Object.assign(drive, view),
+  onStart: () => (dragging = true),
+  onEnd: () => (dragging = false),
+  onReset: () => {
+    Object.assign(drive, lookView);
+    syncViewControls();
+    commitDesign();
+    el("design-status").textContent = "View reset to the look's viewpoint.";
   },
-  { passive: false },
-);
+});
 function resize() {
   const ratio = Math.min(devicePixelRatio, 1.5, 1920 / innerWidth, 1080 / innerHeight);
   canvas.width = Math.max(1, Math.round(innerWidth * ratio));
@@ -1168,7 +1168,7 @@ function frame(now: number) {
     drive.high += (clamp(high) * reactivity - drive.high) * smoothing;
     burst *= Math.exp(-dt * 2.8);
     drive.ripple += (Math.max(burst, clamp(transient) * reactivity) - drive.ripple) * smoothing;
-    if (!pointer && enabled.motion) {
+    if (!dragging && enabled.motion) {
       // Independent slow tumbling; dragging temporarily takes over the view.
       const turn = dt * 0.6;
       drive.pitch = (drive.pitch + turn * rotation.x) % (Math.PI * 2);
