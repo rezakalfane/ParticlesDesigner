@@ -1,5 +1,6 @@
 # Publishes the embed kit to npm (@absolumont/particles-designer) when a version tag
-# is pushed (git tag v0.1.1 && git push --tags). jsDelivr and unpkg serve it from there.
+# is pushed (npm version patch && git push --follow-tags), then creates the GitHub
+# Release (scripts/github-release.sh). jsDelivr and unpkg serve the npm package.
 #
 # Uses npm trusted publishing (OIDC): no npm token is stored in GitHub. Configure it once
 # on npmjs.com → the package → Settings → Trusted publishing → GitHub Actions:
@@ -12,14 +13,16 @@ on:
     tags: ["v*"]
 
 permissions:
-  contents: read
-  id-token: write
+  contents: write # create the GitHub Release
+  id-token: write # npm trusted publishing (OIDC)
 
 jobs:
   publish:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0 # full history and tags, for "changes since the previous tag"
       - uses: actions/setup-node@v7
         with:
           node-version: 24
@@ -32,4 +35,17 @@ jobs:
             echo "Tag ${GITHUB_REF_NAME} does not match package.json version ${version}"; exit 1; }
       - run: npm ci
       # prepublishOnly runs `npm run verify` (format, types, tests, app + kit builds).
-      - run: npm publish
+      # Re-runs skip the publish when this version is already on npm.
+      - name: npm publish
+        run: |
+          name="$(node -p 'require("./package.json").name')"
+          version="$(node -p 'require("./package.json").version')"
+          if npm view "${name}@${version}" version >/dev/null 2>&1; then
+            echo "${name}@${version} is already on npm; skipping publish."
+          else
+            npm publish
+          fi
+      - name: GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: scripts/github-release.sh "${GITHUB_REF_NAME}"

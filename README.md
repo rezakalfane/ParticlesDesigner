@@ -101,6 +101,17 @@ and on jsDelivr. See [docs/EMBED.md](https://github.com/rezakalfane/ParticlesDes
 | `npm run rehearse:roto`  | Browser rehearsal with simulated Web MIDI (needs `npm run dev`)   |
 | `npm run rehearse:embed` | Browser rehearsal of every embed example (needs `npm run dev`)    |
 
+## Releasing
+
+```sh
+npm version patch && git push --follow-tags
+```
+
+The version tag runs `.github/workflows/publish.yml`: checks, npm publish via trusted
+publishing (with provenance; jsDelivr follows), then a GitHub Release with the
+commits since the previous tag and the kit builds + ROTO-SETUP files attached.
+Preview the notes with `DRY_RUN=1 scripts/github-release.sh v0.1.1`.
+
 ## Layout
 
 ```
