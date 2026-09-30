@@ -1,5 +1,6 @@
 import { connectDesignerRoto } from "./roto";
 import { createSlotDialog } from "./dialog";
+import { createEmbedDialog } from "./embedDialog";
 import { DEFAULT_GEOMETRY, type CustomGeometry } from "../engine/customGeometry";
 import {
   parseDesign,
@@ -1262,6 +1263,8 @@ function restoreDesign(value: AuthoringState | undefined) {
 }
 el("design-undo").onclick = () => restoreDesign(designHistory.undo());
 el("design-redo").onclick = () => restoreDesign(designHistory.redo());
+const openEmbedDialog = createEmbedDialog();
+el("embed").onclick = () => openEmbedDialog(captureDesign());
 let sliderDrag = false;
 const panel = document.querySelector("aside")!;
 panel.addEventListener("pointerdown", (event) => {

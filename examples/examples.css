@@ -1,0 +1,67 @@
+/* Shared styling for the embed examples (not needed by the kit itself). */
+:root {
+  color-scheme: dark;
+  font-family: "Avenir Next", "Helvetica Neue", Arial, system-ui, sans-serif;
+  background: #0b0c0e;
+  color: #eceae4;
+}
+body {
+  margin: 0;
+  line-height: 1.5;
+}
+main {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 32px 24px 64px;
+}
+h1 {
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+a {
+  color: #8fc7ff;
+}
+code,
+pre {
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 13px;
+}
+pre {
+  background: #15171a;
+  border: 1px solid #262a30;
+  border-radius: 8px;
+  padding: 12px 14px;
+  overflow: auto;
+}
+.stage {
+  width: 100%;
+  height: 480px;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #000;
+}
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 16px 0;
+  align-items: center;
+}
+button,
+select {
+  font: inherit;
+  color: inherit;
+  background: #1b1e23;
+  border: 1px solid #333842;
+  border-radius: 6px;
+  padding: 6px 12px;
+  cursor: pointer;
+}
+button[aria-pressed="true"] {
+  background: #cfe6ff;
+  color: #0b0c0e;
+}
+.status {
+  color: #9aa1ab;
+  font-size: 14px;
+}

@@ -1,0 +1,40 @@
+{
+  "name": "Lissajous bloom",
+  "description": "A custom formula: interlaced Lissajous petals breathing in violet and gold.",
+  "formation": 30,
+  "geometry": {
+    "x": "1.6 * sin(a*tau*3 + t*0.3) * (0.6 + 0.4*cos(b*tau))",
+    "y": "1.6 * sin(a*tau*2) * (0.6 + 0.4*sin(b*tau))",
+    "z": "1.2 * cos(a*tau*5 + t*0.2) * (0.5 + 0.5*c)"
+  },
+  "palette": ["#5B2BD6", "#C04CFF", "#FFC46B"],
+  "view": [20, 18, 0, 5.2],
+  "settings": {
+    "Particle density": 0.7,
+    "Particle thickness": 0.22,
+    "Expansion": 0.8,
+    "Particle dispersion": 0.04,
+    "Turbulence": 0.12,
+    "Light": 0.5,
+    "Color variety": 2,
+    "Color drift": 0,
+    "Halo glow": 0.45,
+    "Depth softness": 0.3,
+    "Focus plane": 0.5,
+    "Ribbon brightness": 0.6,
+    "Ribbon length": 0.9,
+    "Motion": 0.5,
+    "Rotation Y": 0.15,
+    "Audio depth": 1
+  },
+  "groups": {
+    "particles": true,
+    "light": true,
+    "ribbons": true,
+    "attractors": false,
+    "motion": true,
+    "shock": true,
+    "cycle": true,
+    "audio": true
+  }
+}

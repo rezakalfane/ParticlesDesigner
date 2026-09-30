@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Audio — Particles Designer embed</title>
+    <link rel="stylesheet" href="./examples.css" />
+  </head>
+  <body>
+    <main>
+      <h1>Audio</h1>
+      <div id="particles" class="stage"></div>
+      <div class="toolbar">
+        <button data-audio="demo" aria-pressed="true">Demo pulse</button>
+        <button data-audio="microphone">Microphone</button>
+        <button data-audio="file">Audio file</button>
+        <button data-audio="manual">Manual levels</button>
+        <button data-audio="none">Off</button>
+        <label>Gain <input id="gain" type="range" min="0" max="3" step="0.05" value="1" /></label>
+        <label
+          >Depth <input id="depth" type="range" min="0" max="2" step="0.05" value="1.2"
+        /></label>
+      </div>
+      <p class="toolbar">
+        <input id="file" type="file" accept="audio/*" />
+        <audio id="track" controls loop></audio>
+      </p>
+      <p id="status" class="status"></p>
+      <pre>
+new ParticleField("#particles", {
+  look: "electric-bloom",
+  audio: "microphone",
+  audioDepth: 1.2, // most factory looks ship with Audio depth 0
+});
+field.setAudio(document.querySelector("audio")); // keeps playing through the speakers
+field.setAudio("manual");
+field.setAudioLevels({ low: 0.8, mid: 0.3, high: 0.1, transient: 0.9 }); // your own analysis</pre>
+      <p class="status">
+        Audio from another origin needs CORS (<code>crossorigin="anonymous"</code>) or the analysis
+        stays silent. Looks respond through their <em>Audio depth</em> (<code>audioDepth</code>
+        overrides it); transients launch shockwaves (and the collapse cycle when the look enables
+        it).
+      </p>
+    </main>
+    <script type="module">
+      import { ParticleField } from "../dist-embed/particles-designer.js";
+
+      // Most factory looks ship with Audio depth 0: audioDepth makes any look react.
+      const field = new ParticleField("#particles", {
+        look: "electric-bloom",
+        audio: "demo",
+        audioDepth: 1.2,
+      });
+      window.field = field;
+      const track = document.querySelector("#track");
+      const status = document.querySelector("#status");
+      let manual = 0;
+      const buttons = [...document.querySelectorAll("[data-audio]")];
+      for (const button of buttons)
+        button.onclick = async () => {
+          buttons.forEach((b) => b.setAttribute("aria-pressed", String(b === button)));
+          cancelAnimationFrame(manual);
+          const mode = button.dataset.audio;
+          try {
+            await field.setAudio(mode === "file" ? track : mode);
+          } catch {
+            /* status explains */
+          }
+          if (mode === "file" && !track.src) document.querySelector("#file").click();
+          if (mode === "manual") {
+            // Any analysis works: here a synthetic 120 BPM kick.
+            const tick = (now) => {
+              const beat = (now / 500) % 1;
+              field.setAudioLevels({
+                low: Math.exp(-beat * 6),
+                mid: 0.3,
+                high: 0.1,
+                transient: beat < 0.05 ? 1 : 0,
+              });
+              manual = requestAnimationFrame(tick);
+            };
+            manual = requestAnimationFrame(tick);
+          }
+        };
+      document.querySelector("#file").onchange = (event) => {
+        const file = event.target.files[0];
+        if (!file) return;
+        track.src = URL.createObjectURL(file);
+        void track.play();
+        buttons.find((b) => b.dataset.audio === "file").click();
+      };
+      document.querySelector("#depth").oninput = (event) =>
+        (field.audioDepth = Number(event.target.value));
+      document.querySelector("#gain").oninput = (event) =>
+        (field.audioGain = Number(event.target.value));
+      setInterval(() => (status.textContent = field.audioStatus), 250);
+    </script>
+  </body>
+</html>

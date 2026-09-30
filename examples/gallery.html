@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Gallery — Particles Designer embed</title>
+    <link rel="stylesheet" href="./examples.css" />
+  </head>
+  <body>
+    <main>
+      <h1>Gallery</h1>
+      <div id="particles" class="stage"></div>
+      <p id="description" class="status"></p>
+      <div id="looks" class="toolbar"></div>
+    </main>
+    <script type="module">
+      import { ParticleField, LOOKS } from "../dist-embed/particles-designer.js";
+
+      const field = new ParticleField("#particles", { look: LOOKS[0], interactive: true });
+      window.field = field;
+      const description = document.querySelector("#description");
+      const buttons = LOOKS.map((look) => {
+        const button = document.createElement("button");
+        button.textContent = look.name;
+        button.title = look.id;
+        button.onclick = async () => {
+          buttons.forEach((b) => b.setAttribute("aria-pressed", String(b === button)));
+          description.textContent = look.description;
+          await field.setLook(look); // smooth 1.8 s transition, like the Designer
+        };
+        return button;
+      });
+      document.querySelector("#looks").append(...buttons);
+      buttons[0].setAttribute("aria-pressed", "true");
+      description.textContent = LOOKS[0].description;
+    </script>
+  </body>
+</html>

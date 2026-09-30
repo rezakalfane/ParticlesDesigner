@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Script tag — Particles Designer embed</title>
+    <link rel="stylesheet" href="./examples.css" />
+    <!-- Classic script, no bundler: exposes the global `ParticlesDesigner`. -->
+    <script src="../dist-embed/particles-designer.iife.js"></script>
+  </head>
+  <body>
+    <main>
+      <h1>Script tag</h1>
+      <canvas id="particles" class="stage"></canvas>
+      <pre>
+&lt;script src="particles-designer.iife.js"&gt;&lt;/script&gt;
+&lt;canvas id="particles" style="width:100%;height:480px"&gt;&lt;/canvas&gt;
+&lt;script&gt;
+  new ParticlesDesigner.ParticleField("#particles", { look: "northern-lights" });
+&lt;/script&gt;</pre>
+    </main>
+    <script>
+      // Passing a <canvas> uses it directly; any other element gets a canvas appended.
+      window.field = new ParticlesDesigner.ParticleField("#particles", { look: "northern-lights" });
+    </script>
+  </body>
+</html>

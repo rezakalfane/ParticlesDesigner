@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Web component — Particles Designer embed</title>
+    <link rel="stylesheet" href="./examples.css" />
+    <!-- Importing the kit registers <particle-field>. -->
+    <script type="module" src="../dist-embed/particles-designer.js"></script>
+    <style>
+      particle-field {
+        width: 100%;
+        height: 360px;
+        border-radius: 12px;
+        margin: 12px 0 8px;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>&lt;particle-field&gt;</h1>
+
+      <h2>A factory look</h2>
+      <particle-field
+        id="factory"
+        look="neon-weave"
+        audio="demo"
+        audio-depth="1"
+        interactive
+      ></particle-field>
+      <pre>
+&lt;particle-field look="neon-weave" audio="demo" audio-depth="1" interactive&gt;&lt;/particle-field&gt;</pre>
+      <div class="toolbar">
+        <button data-look="neon-weave">Neon weave</button>
+        <button data-look="ember-shell">Ember shell</button>
+        <button data-look="pearl-planet">Pearl planet</button>
+        <span class="status">Changing the <code>look</code> attribute transitions smoothly.</span>
+      </div>
+
+      <h2>A design file (<code>src</code>)</h2>
+      <particle-field src="./looks/lissajous-bloom.json" interactive zoom></particle-field>
+      <pre>
+&lt;particle-field src="./looks/lissajous-bloom.json" interactive zoom&gt;&lt;/particle-field&gt;</pre>
+
+      <h2>Inline JSON (what the Designer's Embed button copies)</h2>
+      <particle-field>
+        <script type="application/json">
+          {
+            "name": "Rose tide",
+            "description": "A factory shape recolored with an explicit palette.",
+            "formation": 3,
+            "palette": ["#FF4D8D", "#FFD1E3"],
+            "view": [0, 30, 0, 4.6],
+            "settings": {
+              "Particle density": 0.5,
+              "Light": 0.55,
+              "Color variety": 1,
+              "Motion": 0.6,
+              "Rotation Y": 0.2
+            }
+          }
+        </script>
+      </particle-field>
+      <pre>
+&lt;particle-field&gt;
+  &lt;script type="application/json"&gt;{ "name": "Rose tide", "formation": 3, … }&lt;/script&gt;
+&lt;/particle-field&gt;</pre>
+    </main>
+    <script type="module">
+      const field = document.querySelector("#factory");
+      for (const button of document.querySelectorAll("[data-look]"))
+        button.onclick = () => field.setAttribute("look", button.dataset.look);
+    </script>
+  </body>
+</html>

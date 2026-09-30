@@ -3,21 +3,35 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "ABSOLUMONT Particles Designer — author GPU particle fields (WebGL2) with presets, shapes, AI prompts and ROTO-CONTROL.",
+  "description": "ABSOLUMONT Particles Designer \u2014 author GPU particle fields (WebGL2) with presets, shapes, AI prompts and ROTO-CONTROL.",
   "author": "Reza Kalfane, Absolumont Collective",
   "license": "MIT",
+  "exports": {
+    ".": {
+      "types": "./dist-embed/types/embed/index.d.ts",
+      "import": "./dist-embed/particles-designer.js"
+    }
+  },
+  "files": [
+    "dist-embed",
+    "README.md",
+    "LICENSE"
+  ],
   "scripts": {
     "dev": "vite --host",
     "build": "tsc --noEmit && vite build",
+    "build:embed": "vite build --config vite.embed.config.ts && tsc -p tsconfig.embed.json",
+    "examples": "npm run build:embed && vite --open /examples/",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "verify": "npm run format:check && npm run typecheck && npm run test && npm run build",
+    "verify": "npm run format:check && npm run typecheck && npm run test && npm run build && npm run build:embed",
     "roto:presets": "tsx scripts/generate-roto-presets.ts",
     "bake": "tsx scripts/bake-library.ts",
-    "rehearse:roto": "node scripts/rehearse-roto.mjs"
+    "rehearse:roto": "node scripts/rehearse-roto.mjs",
+    "rehearse:embed": "node scripts/rehearse-embed.mjs"
   },
   "devDependencies": {
     "@types/node": "^26.6.0",

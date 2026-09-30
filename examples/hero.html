@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Hero background — Particles Designer embed</title>
+    <link rel="stylesheet" href="./examples.css" />
+    <style>
+      .hero {
+        position: relative;
+        min-height: 100vh;
+        display: grid;
+        place-items: center;
+        overflow: hidden;
+        /* Any background works: the field is additive light on black, so "screen"
+           blending drops the black and keeps only the light. */
+        background: radial-gradient(circle at 30% 20%, #1d2a4a, #07080c 70%);
+      }
+      .hero particle-field {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        mix-blend-mode: screen;
+        pointer-events: none;
+      }
+      .hero .copy {
+        position: relative;
+        text-align: center;
+        padding: 24px;
+      }
+      .hero h1 {
+        font-size: clamp(40px, 8vw, 96px);
+        margin: 0;
+        letter-spacing: 0.08em;
+      }
+    </style>
+    <script type="module" src="../dist-embed/particles-designer.js"></script>
+  </head>
+  <body>
+    <section class="hero">
+      <!-- Stops rendering when scrolled away; honours prefers-reduced-motion. -->
+      <particle-field look="event-horizon" max-particles="80000" pixel-ratio="1"></particle-field>
+      <div class="copy">
+        <h1>ABSOLUMONT</h1>
+        <p>Light, sculpted by sound.</p>
+      </div>
+    </section>
+    <main>
+      <h2>How it works</h2>
+      <pre>
+&lt;section class="hero"&gt;
+  &lt;particle-field look="event-horizon" max-particles="80000" pixel-ratio="1"&gt;&lt;/particle-field&gt;
+  …content…
+&lt;/section&gt;
+
+.hero particle-field {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  mix-blend-mode: screen;   /* keep the light, drop the black */
+  pointer-events: none;     /* page stays clickable */
+}</pre>
+      <p>
+        <code>max-particles</code> and <code>pixel-ratio</code> keep a background light on laptops
+        and phones. Scroll down and the field stops rendering until it is visible again.
+      </p>
+      <div style="height: 80vh"></div>
+    </main>
+  </body>
+</html>

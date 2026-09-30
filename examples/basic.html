@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Basic — Particles Designer embed</title>
+    <link rel="stylesheet" href="./examples.css" />
+  </head>
+  <body>
+    <main>
+      <h1>Basic</h1>
+      <!-- The field fills its container: give it a size. -->
+      <div id="particles" class="stage"></div>
+      <div class="toolbar">
+        <button id="ripple">Ripple</button>
+        <button id="cycle">Collapse → explode</button>
+        <button id="pause">Pause</button>
+      </div>
+      <pre>
+import { ParticleField } from "particles-designer";
+
+const field = new ParticleField("#particles", {
+  look: "galaxy-drift", // a factory look id or name, or a Designer design object/JSON
+  interactive: true,    // drag to orbit
+});
+field.ripple();         // shockwave (when the look enables it)
+field.cycle();          // collapse → explode → reform</pre>
+    </main>
+    <script type="module">
+      import { ParticleField } from "../dist-embed/particles-designer.js";
+
+      const field = new ParticleField("#particles", { look: "galaxy-drift", interactive: true });
+      window.field = field;
+      document.querySelector("#ripple").onclick = () => field.ripple();
+      document.querySelector("#cycle").onclick = () => field.cycle();
+      document.querySelector("#pause").onclick = (event) => {
+        if (field.paused) field.play();
+        else field.pause();
+        event.target.textContent = field.paused ? "Play" : "Pause";
+      };
+    </script>
+  </body>
+</html>

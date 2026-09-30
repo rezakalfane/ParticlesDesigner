@@ -1,6 +1,14 @@
 import { chromium } from "playwright";
 import assert from "node:assert/strict";
-const browser = await chromium.launch({ headless: true });
+// Real GPU (Metal/ANGLE on macOS): headless Chrome otherwise emulates WebGL on the
+// CPU (SwiftShader), pegging every core and slowing frames to ~1 fps.
+// REHEARSE_SOFTWARE_GL=1 keeps software rendering (e.g. CI without a GPU).
+const browser = await chromium.launch({
+  headless: true,
+  args: process.env.REHEARSE_SOFTWARE_GL
+    ? []
+    : ["--use-angle=metal", "--enable-gpu", "--ignore-gpu-blocklist"],
+});
 try {
   const page = await browser.newPage({
     viewport: { width: 1440, height: 1000 },

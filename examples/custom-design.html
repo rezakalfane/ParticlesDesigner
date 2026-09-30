@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Custom design — Particles Designer embed</title>
+    <link rel="stylesheet" href="./examples.css" />
+  </head>
+  <body>
+    <main>
+      <h1>Custom design</h1>
+      <p>
+        Design a look in the Designer, press <strong>Embed</strong> → <em>Download JSON</em>, and
+        load it. Custom formulas (AI-invented shapes) compile in the background, so switching never
+        freezes the page.
+      </p>
+      <div id="particles" class="stage"></div>
+      <div class="toolbar">
+        <button id="custom">Lissajous bloom (custom formula)</button>
+        <button id="factory">Deep sea (factory)</button>
+      </div>
+      <pre>
+import { ParticleField, fetchLook } from "particles-designer";
+
+const field = new ParticleField("#particles", {
+  look: await fetchLook("./looks/lissajous-bloom.json"),
+  interactive: true,
+});
+field.setLook("deep-sea"); // transitions between custom and factory shapes</pre>
+    </main>
+    <script type="module">
+      import { ParticleField, fetchLook } from "../dist-embed/particles-designer.js";
+
+      const bloom = await fetchLook("./looks/lissajous-bloom.json");
+      const field = new ParticleField("#particles", { look: bloom, interactive: true, zoom: true });
+      window.field = field;
+      document.querySelector("#custom").onclick = () => field.setLook(bloom);
+      document.querySelector("#factory").onclick = () => field.setLook("deep-sea");
+    </script>
+  </body>
+</html>
