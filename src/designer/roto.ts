@@ -11,8 +11,21 @@ export interface DesignerRotoHost {
   /** UI element edited by a knob/action key; its section is scrolled into view. */
   locate?(key: string): Element | null;
 }
+/** Where the ROTO UI goes; without slots it is one block at the top of `container`. */
+export interface DesignerRotoSlots {
+  /** The browsed look/shape ("P1:2 · Galaxy drift / S1:1 · Vortex"). */
+  nowPlaying: HTMLElement;
+  /** Connect ROTO, connection status and the setup-files link. */
+  connection: HTMLElement;
+  /** The hardware page buttons (LOOKS … AUDIO). */
+  pages: HTMLElement;
+}
 /** Designer-local ROTO adapter. */
-export function connectDesignerRoto(host: DesignerRotoHost, container: HTMLElement) {
+export function connectDesignerRoto(
+  host: DesignerRotoHost,
+  container: HTMLElement,
+  slots?: DesignerRotoSlots,
+) {
   const nav = navigator as Navigator & { requestMIDIAccess?: RequestMIDIAccessLike };
   const physical = new PhysicalRoto({ requestMIDIAccess: nav.requestMIDIAccess?.bind(nav) });
   const setups = designerSetupDocuments().map((doc) => parseRotoSetup(JSON.stringify(doc)));
@@ -32,8 +45,16 @@ export function connectDesignerRoto(host: DesignerRotoHost, container: HTMLEleme
   setupFiles.target = "_blank";
   setupFiles.textContent = "Get the ROTO-SETUP files (channels 9–11)";
   setupFiles.className = "designer-roto-files";
-  strip.append(connect, status, candidate, pages, setupFiles);
-  container.prepend(strip);
+  if (slots) {
+    candidate.className = "designer-roto-now";
+    slots.nowPlaying.append(candidate);
+    strip.append(connect, status, setupFiles);
+    slots.connection.append(strip);
+    slots.pages.append(pages);
+  } else {
+    strip.append(connect, status, candidate, pages, setupFiles);
+    container.prepend(strip);
+  }
   let active: { setup: number; page: number } | undefined;
   let pending: ReturnType<typeof setTimeout> | undefined;
   let dirty = false;
@@ -160,5 +181,7 @@ export function connectDesignerRoto(host: DesignerRotoHost, container: HTMLEleme
     clearInterval(timer);
     physical.disconnect();
     strip.remove();
+    candidate.remove();
+    pages.remove();
   };
 }

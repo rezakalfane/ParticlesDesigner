@@ -65,7 +65,22 @@ aside {
 .intro {
   color: #a8b7ca;
   line-height: 1.6;
-  margin-bottom: 24px;
+  margin-bottom: 14px;
+}
+/* What's playing: the browsed look and shape. */
+.now-playing {
+  margin-bottom: 14px;
+  color: #e3ecf6;
+  font-size: 12px;
+}
+.now-playing:empty {
+  display: none;
+}
+#roto-connection .designer-roto {
+  padding-bottom: 14px;
+}
+.roto-sections {
+  margin-bottom: 20px;
 }
 fieldset {
   padding: 0;

@@ -1930,5 +1930,6 @@ const disposeDesignerRoto = connectDesignerRoto(
     },
   },
   panel,
+  { nowPlaying: el("now-playing"), connection: el("roto-connection"), pages: el("roto-sections") },
 );
 window.addEventListener("pagehide", disposeDesignerRoto, { once: true });
