@@ -46,7 +46,8 @@ shares them. Browser storage is the fallback when no host is available.
 
 Slot badges tell them apart: a hollow ring is built-in, a filled dot is saved.
 Hover a saved slot for × (or press Delete) to remove it; a built-in it covered
-comes back. **Export library** / **Import…** (above Presets) back up and move
+comes back. On touch screens the × is always shown, and a long-press on any slot
+offers Replace (the Shift+click equivalent) and Delete. **Export library** / **Import…** (above Presets) back up and move
 saved work between browsers, or into your local copy; Import also accepts a
 single look downloaded from Embed.
 

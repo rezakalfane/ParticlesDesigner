@@ -1,5 +1,5 @@
 import { connectDesignerRoto } from "./roto";
-import { createSlotDialog } from "./dialog";
+import { createSlotDialog, createSlotMenu, onLongPress } from "./dialog";
 import { createEmbedDialog } from "./embedDialog";
 import {
   importImpact,
@@ -330,6 +330,7 @@ function refreshShapeSelection() {
     });
 }
 const slotDialog = createSlotDialog();
+const slotMenu = createSlotMenu();
 function mountBanks<T extends { name: string }>(
   navId: string,
   gridId: string,
@@ -372,6 +373,23 @@ function mountBanks<T extends { name: string }>(
     render();
     el("design-status").textContent =
       `Deleted “${item.name}”.` + (builtIn ? ` Built-in “${builtIn.name}” restored.` : "");
+  }
+  /** Replaces an occupied slot with the current design (asks for the name). */
+  async function replace(bank: number, slot: number) {
+    const item = banks[bank][slot];
+    if (!item) return;
+    const confirmed = await slotDialog({
+      title: `Replace ${kind.toLowerCase()}?`,
+      name: item.name,
+      description: `Replace “${item.name}” in ${bankLabel(kind === "Shape" ? "shape" : "preset", bank)}, slot ${slot + 1} with the current design?`,
+      action: "Replace",
+    });
+    if (!confirmed) return;
+    const saved = await save(bank, slot, confirmed);
+    if (saved) {
+      banks[bank][slot] = saved;
+      render();
+    }
   }
   function render() {
     tabs.forEach((tab, bank) => tab.setAttribute("aria-pressed", String(bank === selectedBank)));
@@ -429,26 +447,24 @@ function mountBanks<T extends { name: string }>(
             if (!event.shiftKey) {
               load?.call(button, event);
               if (kind === "Shape") {
-                selectedShapeSlot = selectedBank * 16 + slot;
+                selectedShapeSlot = bank * 16 + slot;
                 refreshShapeSelection();
                 commitDesign();
               }
               return;
             }
-            const name = button.textContent || kind;
-            const confirmed = await slotDialog({
-              title: `Replace ${kind.toLowerCase()}?`,
-              name,
-              description: `Replace “${name}” in ${bankLabel(kind === "Shape" ? "shape" : "preset", selectedBank)}, slot ${slot + 1} with the current design?`,
-              action: "Replace",
-            });
-            if (!confirmed) return;
-            const saved = await save(selectedBank, slot, confirmed);
-            if (saved) {
-              banks[selectedBank][slot] = saved;
-              render();
-            }
+            void replace(bank, slot);
           };
+          // Touch screens: long-press for Replace / Delete (the Shift+click and × equivalents).
+          onLongPress(button, async () => {
+            const choice = await slotMenu({
+              title: item.name,
+              description: `${bankLabel(kind === "Shape" ? "shape" : "preset", bank)}, slot ${slot + 1} · ${isSaved ? (hostSlots ? "saved in the host library" : "saved in this browser") : "built-in"}`,
+              canDelete: isSaved,
+            });
+            if (choice === "replace") void replace(bank, slot);
+            if (choice === "delete") void remove(bank, slot);
+          });
         }
         return button;
       }),

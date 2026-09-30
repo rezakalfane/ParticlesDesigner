@@ -349,6 +349,56 @@ footer {
   background: #6b1f2a;
   border-color: #ff8d9b;
 }
+/* Touch screens (no hover): saved slots always show a tappable × with a ~34 px target. */
+@media (hover: none) {
+  .slot-saved .slot-badge {
+    top: 2px;
+    right: 2px;
+    width: 18px;
+    height: 18px;
+    display: grid;
+    place-items: center;
+    background: #0c1826;
+    border-color: #79bad9;
+    box-shadow: none;
+    pointer-events: auto;
+  }
+  .slot-saved .slot-badge::before {
+    content: "×";
+    color: #e8edf5;
+    font-size: 14px;
+    line-height: 1;
+  }
+  .slot-saved .slot-badge::after {
+    content: "";
+    position: absolute;
+    inset: -8px;
+  }
+  .hover-only {
+    display: none;
+  }
+}
+@media (hover: hover) {
+  .touch-only {
+    display: none;
+  }
+}
+.lab-bank-slots button {
+  -webkit-touch-callout: none;
+  user-select: none;
+}
+.slot-menu-actions {
+  display: grid;
+  gap: 8px;
+}
+.slot-menu-actions button {
+  padding: 12px;
+  font-size: 15px;
+}
+.slot-menu-actions .slot-menu-delete {
+  color: #ffb3bd;
+  border-color: #8a3a46;
+}
 .slot-legend {
   display: flex;
   flex-wrap: wrap;
