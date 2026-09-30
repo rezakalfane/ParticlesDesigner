@@ -8,3 +8,6 @@ test-report/
 .env.local
 .env.*.local
 dist-embed/
+dist-electron/
+release/
+electron/icon.iconset/

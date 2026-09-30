@@ -61,10 +61,17 @@
     "rehearse:embed": "node scripts/rehearse-embed.mjs",
     "rehearse:boot": "node scripts/rehearse-boot.mjs",
     "rehearse:quality": "node scripts/rehearse-quality.mjs",
-    "prepublishOnly": "npm run verify"
+    "prepublishOnly": "npm run verify",
+    "electron:build": "npm run build && node scripts/build-electron.mjs",
+    "electron:dev": "npm run electron:build && electron .",
+    "icon": "electron scripts/generate-icon.mjs",
+    "dist:mac": "npm run electron:build && electron-builder --mac --arm64"
   },
   "devDependencies": {
     "@types/node": "^26.6.0",
+    "electron": "^44.5.1",
+    "electron-builder": "^26.15.3",
+    "esbuild": "^0.28.2",
     "jsdom": "^25.0.1",
     "playwright": "^1.63.0",
     "prettier": "^3.4.2",
@@ -72,5 +79,33 @@
     "typescript": "^5.7.2",
     "vite": "^6.0.7",
     "vitest": "^2.1.8"
+  },
+  "main": "dist-electron/main.mjs",
+  "build": {
+    "appId": "com.absolumont.particlesdesigner",
+    "productName": "Particles Designer",
+    "executableName": "Particles Designer",
+    "copyright": "Reza Kalfane, Absolumont Collective",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "dist-electron/main.mjs",
+      "dist/**",
+      "package.json"
+    ],
+    "asar": true,
+    "npmRebuild": false,
+    "mac": {
+      "category": "public.app-category.graphics-design",
+      "icon": "electron/icon.icns",
+      "target": [
+        "dmg",
+        "dir"
+      ]
+    },
+    "dmg": {
+      "title": "Particles Designer"
+    }
   }
 }
