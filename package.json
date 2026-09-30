@@ -60,6 +60,7 @@
     "rehearse:roto": "node scripts/rehearse-roto.mjs",
     "rehearse:embed": "node scripts/rehearse-embed.mjs",
     "rehearse:boot": "node scripts/rehearse-boot.mjs",
+    "rehearse:quality": "node scripts/rehearse-quality.mjs",
     "prepublishOnly": "npm run verify"
   },
   "devDependencies": {

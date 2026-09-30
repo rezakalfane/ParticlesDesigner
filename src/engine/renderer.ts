@@ -18,6 +18,8 @@ export function particleCount(density: number, limit = 100_000): number {
   );
 }
 
+/** Scaled-down looks never drop below this many particles (unless authored lower). */
+const MIN_SCALED_COUNT = 4000;
 /** Standalone, clock-injected GPU surface. No audio, RAF, registry or session ownership. */
 export interface ParticleDrive {
   formation: number;
@@ -882,6 +884,12 @@ export class ParticleRenderer {
    * dense looks they dominate GPU time; a hashed id gives an even subset.
    */
   ribbonLimit = Number.POSITIVE_INFINITY;
+  /**
+   * Quality levers for hosts that adapt to the device (the embed kit): the share of
+   * particles drawn (0..1] and of the ribbon budget (0 = no ribbons). 1 = as authored.
+   */
+  countScale = 1;
+  ribbonScale = 1;
   gpuMs: number | null = null;
   private timer: { TIME_ELAPSED_EXT: number; GPU_DISJOINT_EXT: number } | null;
   private pendingQuery: WebGLQuery | null = null;
@@ -937,7 +945,11 @@ export class ParticleRenderer {
   ): void {
     const gl = this.gl;
     if (gl.isContextLost()) return;
-    this.count = particleCount(drive.density, this.maxParticles);
+    const authored = particleCount(drive.density, this.maxParticles);
+    this.count =
+      this.countScale >= 1
+        ? authored
+        : Math.max(Math.min(authored, MIN_SCALED_COUNT), Math.round(authored * this.countScale));
     if (tile) this.count = Math.max(1, Math.min(this.maxParticles, Math.round(tile.count)));
     if (this.timer && this.pendingQuery) {
       if (gl.getParameter(this.timer.GPU_DISJOINT_EXT)) {
@@ -952,7 +964,10 @@ export class ParticleRenderer {
     }
     const query = this.timer && !this.pendingQuery ? gl.createQuery() : null;
     if (query && this.timer) gl.beginQuery(this.timer.TIME_ELAPSED_EXT, query);
-    const trail = Number.isFinite(drive.trail) ? Math.max(0, Math.min(1, drive.trail)) : 0;
+    const trail =
+      this.ribbonScale > 0 && Number.isFinite(drive.trail)
+        ? Math.max(0, Math.min(1, drive.trail))
+        : 0;
     if (timeMs < this.lastTime || timeMs - this.lastTime > 500) {
       this.waves.length = 0;
       this.waveArmed = true;
@@ -1085,6 +1100,10 @@ export class ParticleRenderer {
       this.pendingQuery = query;
     }
   }
+  /** Particles that draw ribbons: the ribbon scale of the count, capped by ribbonLimit. */
+  private get ribbonBudget(): number {
+    return Math.min(this.count * Math.min(1, this.ribbonScale), this.ribbonLimit);
+  }
   private draw(
     timeMs: number,
     drive: ParticleDrive,
@@ -1123,7 +1142,7 @@ export class ParticleRenderer {
     gl.uniform1f(this.uniforms.hue, drive.hue);
     gl.uniform1f(this.uniforms.colorVariety, Math.max(0, Math.min(5, drive.colorVariety ?? 1)));
     // Thinned ribbons (ribbonLimit) keep part of the trail light: √(all / drawn).
-    const thinned = previous ? this.count / Math.min(this.count, this.ribbonLimit) : 1;
+    const thinned = previous ? this.count / Math.max(1, this.ribbonBudget) : 1;
     gl.uniform1f(this.uniforms.opacity, opacity * Math.sqrt(Math.max(1, thinned)));
     gl.uniform1f(
       this.uniforms.trailWidth,
@@ -1155,12 +1174,7 @@ export class ParticleRenderer {
       gl.uniform2f(this.uniforms.previous, previous.timeMs / 1000, previous.opacity);
       gl.uniform4f(this.uniforms.previousShape, d.formation, d.spread, d.turbulence, d.glow);
       gl.uniform4f(this.uniforms.previousAudio, d.low, d.mid, d.high, d.ripple);
-      gl.drawArraysInstanced(
-        gl.TRIANGLES,
-        0,
-        6,
-        Math.floor(Math.min(this.count, this.ribbonLimit) / 8),
-      );
+      gl.drawArraysInstanced(gl.TRIANGLES, 0, 6, Math.floor(this.ribbonBudget / 8));
     } else gl.drawArrays(gl.POINTS, 0, this.count);
   }
   /** Drops trails and shockwaves (a new look), keeping the GL program and context. */

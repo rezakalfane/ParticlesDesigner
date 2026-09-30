@@ -79,28 +79,30 @@ const field = new ParticleField("#hero", {
 ```
 
 In the Designer, **Embed** copies a ready-to-paste snippet of the current look or
-downloads it as JSON. The kit is about 30 KB gzipped with no dependencies, on npm
+downloads it as JSON. The kit is about 37 KB gzipped with no dependencies, and it
+adapts its quality to each visitor's device so it stays smooth on phones. It is on npm
 as [`@absolumont/particles-designer`](https://www.npmjs.com/package/@absolumont/particles-designer)
 and on jsDelivr. See [docs/EMBED.md](https://github.com/rezakalfane/ParticlesDesigner/blob/main/docs/EMBED.md) and the
 [live examples](https://rezakalfane.github.io/ParticlesDesigner/examples/).
 
 ## Scripts
 
-| Command                  | What it does                                                          |
-| ------------------------ | --------------------------------------------------------------------- |
-| `npm run dev`            | Vite dev server with the Designer host APIs (LAN-exposed)             |
-| `npm run build`          | Typecheck + static build in `dist/`                                   |
-| `npm run preview`        | Serve the build with the host APIs                                    |
-| `npm test`               | Unit tests (Vitest)                                                   |
-| `npm run build:embed`    | Build the embed kit into `dist-embed/` (ESM, IIFE, types)             |
-| `npm run build:site`     | App + kit + examples as one static site in `dist/` (GitHub Pages)     |
-| `npm run examples`       | Build the kit and open the embed examples                             |
-| `npm run verify`         | Format check, typecheck, tests, app and embed builds                  |
-| `npm run bake`           | Bake the saved slot library into factory shapes/looks                 |
-| `npm run roto:presets`   | Regenerate the ROTO-CONTROL setup files in `roto/`                    |
-| `npm run rehearse:roto`  | Browser rehearsal with simulated Web MIDI (needs `npm run dev`)       |
-| `npm run rehearse:embed` | Browser rehearsal of every embed example (needs `npm run dev`)        |
-| `npm run rehearse:boot`  | Reload check: no unstyled flash, splash removed (needs `npm run dev`) |
+| Command                    | What it does                                                          |
+| -------------------------- | --------------------------------------------------------------------- |
+| `npm run dev`              | Vite dev server with the Designer host APIs (LAN-exposed)             |
+| `npm run build`            | Typecheck + static build in `dist/`                                   |
+| `npm run preview`          | Serve the build with the host APIs                                    |
+| `npm test`                 | Unit tests (Vitest)                                                   |
+| `npm run build:embed`      | Build the embed kit into `dist-embed/` (ESM, IIFE, types)             |
+| `npm run build:site`       | App + kit + examples as one static site in `dist/` (GitHub Pages)     |
+| `npm run examples`         | Build the kit and open the embed examples                             |
+| `npm run verify`           | Format check, typecheck, tests, app and embed builds                  |
+| `npm run bake`             | Bake the saved slot library into factory shapes/looks                 |
+| `npm run roto:presets`     | Regenerate the ROTO-CONTROL setup files in `roto/`                    |
+| `npm run rehearse:roto`    | Browser rehearsal with simulated Web MIDI (needs `npm run dev`)       |
+| `npm run rehearse:embed`   | Browser rehearsal of every embed example (needs `npm run dev`)        |
+| `npm run rehearse:boot`    | Reload check: no unstyled flash, splash removed (needs `npm run dev`) |
+| `npm run rehearse:quality` | Adaptive quality on a deliberately slow device (needs `npm run dev`)  |
 
 ## Releasing
 

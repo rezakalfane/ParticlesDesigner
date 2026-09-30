@@ -13,5 +13,6 @@ export { ParticleFieldElement, defineParticleFieldElement } from "./element";
 export { LOOKS, DEFAULT_LOOK, resolveLook, fetchLook, type Look, type LookInput } from "./look";
 export { embedSnippet, lookJSON } from "./snippet";
 export type { AudioInput, AudioLevels } from "./audio";
+export type { QualitySetting } from "./quality";
 
 if (typeof customElements !== "undefined") defineParticleFieldElement();

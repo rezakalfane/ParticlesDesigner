@@ -8,6 +8,12 @@ import { ParticleRenderer, PARTICLE_FORMATION_COUNT, type ParticleDrive } from "
 import { ParticleCycle } from "../engine/particleCycle";
 import { DEFAULT_GEOMETRY, type CustomGeometry } from "../engine/customGeometry";
 import { attachViewGestures } from "../engine/viewGestures";
+import {
+  QUALITY_LEVELS,
+  QualityController,
+  parseQualitySetting,
+  type QualitySetting,
+} from "./quality";
 import { AudioDriver, type AudioInput, type AudioLevels } from "./audio";
 import {
   DEFAULT_LOOK,
@@ -37,6 +43,20 @@ export interface ParticleFieldOptions {
   interactive?: boolean;
   /** Wheel, trackpad pinch and two-finger pinch zoom (captures page scrolling over the field). Default false. */
   zoom?: boolean;
+  /**
+   * "auto" (default) watches frame times and lowers particles, ribbons and resolution when
+   * the device cannot hold ~60 fps, raising them again when there is headroom (and giving up
+   * if lowering does not help, e.g. a 30 fps battery-saver cap). "high" always draws the look
+   * as authored; "medium" and "low" pin a lighter level. See `qualityLevel`, `setQuality()`.
+   */
+  quality?: QualitySetting;
+  /** Called when the quality level changes (0 = as authored; higher is lighter). */
+  onQualityChange?: (level: number) => void;
+  /**
+   * Image URL shown in place of the field when WebGL2 is unavailable (otherwise the canvas
+   * stays empty). Check `field.supported` to swap in your own fallback instead.
+   */
+  poster?: string;
   /** Particle ceiling; looks above it are capped. Default 200,000. */
   maxParticles?: number;
   /** Highest device pixel ratio used. Default 1.5. */
@@ -82,9 +102,12 @@ const weightsFor = (state: LookState) =>
 export class ParticleField {
   readonly canvas: HTMLCanvasElement;
   private readonly options: Required<
-    Omit<ParticleFieldOptions, "look" | "audio" | "onError" | "audioDepth">
+    Omit<
+      ParticleFieldOptions,
+      "look" | "audio" | "onError" | "audioDepth" | "quality" | "onQualityChange" | "poster"
+    >
   > &
-    Pick<ParticleFieldOptions, "onError" | "audioDepth">;
+    Pick<ParticleFieldOptions, "onError" | "audioDepth" | "onQualityChange" | "poster">;
   private renderer?: ParticleRenderer;
   private readonly audio = new AudioDriver();
   private readonly cycleClock = new ParticleCycle();
@@ -103,6 +126,10 @@ export class ParticleField {
   private visible = true;
   private dirty = true;
   private dragging = false;
+  private readonly quality: QualityController;
+  /** Time of the previous rendered frame; undefined after any gap (pause, hidden, idle). */
+  private lastRenderAt: number | undefined;
+  private failed = false;
   private lookRequest = 0;
   private readonly ownsCanvas: boolean;
   private readonly cleanup: (() => void)[] = [];
@@ -133,7 +160,10 @@ export class ParticleField {
       pauseWhenHidden: options.pauseWhenHidden ?? true,
       transitionSeconds: options.transitionSeconds ?? 1.8,
       onError: options.onError,
+      onQualityChange: options.onQualityChange,
+      poster: options.poster,
     };
+    this.quality = new QualityController(parseQualitySetting(options.quality));
     this.isPaused = !this.options.autoplay;
     this.current = resolveLook(options.look ?? DEFAULT_LOOK);
     this.state = lookState(this.current);
@@ -170,6 +200,19 @@ export class ParticleField {
   /** Audio state, e.g. "Listening to the microphone" or "Microphone access denied". */
   get audioStatus(): string {
     return this.audio.status;
+  }
+  /** False when WebGL2 could not start (see `poster` and `onError`). */
+  get supported(): boolean {
+    return !this.failed;
+  }
+  /** Current quality level: 0 draws the look as authored, higher is lighter. */
+  get qualityLevel(): number {
+    return this.quality.level;
+  }
+  /** Switches between "auto" and a fixed quality at run time. */
+  setQuality(setting: QualitySetting): void {
+    this.quality.configure(parseQualitySetting(setting));
+    this.applyQuality();
   }
   /** Particles drawn in the last frame. */
   get particleCount(): number {
@@ -255,6 +298,7 @@ export class ParticleField {
   play(): void {
     this.isPaused = false;
     this.last = performance.now();
+    this.gap();
     this.schedule();
   }
   /** Returns the camera to the current look's own viewpoint (also: double-click). */
@@ -286,10 +330,36 @@ export class ParticleField {
         this.options.maxParticles,
         this.geometry ?? DEFAULT_GEOMETRY,
       );
+      this.failed = false;
+      this.applyScales();
     } catch (error) {
       this.renderer = undefined;
+      this.failed = true;
+      if (this.options.poster) {
+        // A canvas without a context is transparent: the poster shows through.
+        const style = this.canvas.style;
+        style.backgroundImage = `url("${this.options.poster.replace(/["\\]/g, "")}")`;
+        style.backgroundSize = "cover";
+        style.backgroundPosition = "center";
+      }
       this.fail(error);
     }
+  }
+
+  /** Applies the current quality level to the renderer and the canvas size. */
+  private applyQuality(): void {
+    this.applyScales();
+    this.lastRenderAt = undefined;
+    this.resize();
+    this.dirty = true;
+    this.options.onQualityChange?.(this.quality.level);
+    this.schedule();
+  }
+  private applyScales(): void {
+    if (!this.renderer) return;
+    const level = QUALITY_LEVELS[this.quality.level];
+    this.renderer.countScale = level.particles;
+    this.renderer.ribbonScale = level.ribbons;
   }
 
   private prepare(geometry: CustomGeometry): Promise<void> {
@@ -333,12 +403,14 @@ export class ParticleField {
       const observer = new IntersectionObserver(([entry]) => {
         this.visible = entry.isIntersecting;
         this.last = performance.now();
+        this.gap();
         this.schedule();
       });
       observer.observe(canvas);
       this.cleanup.push(() => observer.disconnect());
       this.on(document, "visibilitychange", () => {
         this.last = performance.now();
+        this.gap();
         this.schedule();
       });
     }
@@ -385,12 +457,9 @@ export class ParticleField {
     const width = this.canvas.clientWidth || 300,
       height = this.canvas.clientHeight || 150;
     const [maxWidth, maxHeight] = this.options.maxResolution;
-    const ratio = Math.min(
-      devicePixelRatio,
-      this.options.pixelRatio,
-      maxWidth / width,
-      maxHeight / height,
-    );
+    const ratio =
+      Math.min(devicePixelRatio, this.options.pixelRatio, maxWidth / width, maxHeight / height) *
+      QUALITY_LEVELS[this.quality.level].pixels;
     const w = Math.max(1, Math.round(width * ratio)),
       h = Math.max(1, Math.round(height * ratio));
     if (w === this.canvas.width && h === this.canvas.height) return;
@@ -400,12 +469,18 @@ export class ParticleField {
     this.schedule();
   }
 
+  /** Frame timing restarts after any gap in rendering. */
+  private gap(): void {
+    this.lastRenderAt = undefined;
+    this.quality.reset();
+  }
+
   private get running(): boolean {
     return !this.destroyed && (!this.options.pauseWhenHidden || (this.visible && !document.hidden));
   }
 
   private schedule(): void {
-    if (this.raf || !this.running) return;
+    if (this.raf || !this.running || this.failed) return;
     this.raf = requestAnimationFrame((now) => {
       this.raf = 0;
       this.frame(now);
@@ -492,7 +567,11 @@ export class ParticleField {
       this.lastVisible = { ...visible };
       this.renderer.render(this.time, visible);
       this.dirty = false;
-    }
+      if (this.lastRenderAt !== undefined && this.quality.adaptive) {
+        if (this.quality.frame(now - this.lastRenderAt) !== undefined) this.applyQuality();
+      }
+      this.lastRenderAt = now;
+    } else if (this.lastRenderAt !== undefined) this.gap();
     this.schedule();
   }
 }

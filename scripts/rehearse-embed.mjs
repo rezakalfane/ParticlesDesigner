@@ -61,6 +61,7 @@ try {
     ["examples/gallery.html", "#particles"],
     ["examples/audio.html", "#particles"],
     ["examples/custom-design.html", "#particles"],
+    ["examples/quality.html", "#particles"],
     ["examples/hero.html", "particle-field", true],
   ]) {
     await visit(path);

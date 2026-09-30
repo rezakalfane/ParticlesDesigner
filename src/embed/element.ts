@@ -10,19 +10,30 @@
  * Attributes: look (factory id or name), src (design JSON URL), audio ("none",
  * "demo", "microphone" or a CSS selector for an <audio>/<video>), audio-gain,
  * audio-depth (overrides the look's Audio depth and turns its audio response on),
- * interactive, zoom, paused, max-particles, pixel-ratio. The element is a block
- * that fills its CSS size (300×150 by default); `.field` is the ParticleField.
- * Dispatches "particle-field-error" events with `detail` = Error.
+ * quality ("auto" default, "high", "medium", "low"), poster (image URL shown when
+ * WebGL2 is unavailable), interactive, zoom, paused, max-particles, pixel-ratio. The element
+ * is a block that fills its CSS size (300×150 by default); `.field` is the ParticleField.
+ * Dispatches "particle-field-error" events with `detail` = Error, and
+ * "particle-field-quality" events with `detail` = the new level (0 = as authored).
  */
 import type { AudioInput } from "./audio";
 import { ParticleField } from "./field";
 import { fetchLook, type LookInput } from "./look";
+import { parseQualitySetting } from "./quality";
 
 const STYLE = `:host{display:block;position:relative;width:300px;height:150px;background:#000;overflow:hidden}
 canvas{position:absolute;inset:0;display:block;width:100%;height:100%}`;
 
 export class ParticleFieldElement extends HTMLElement {
-  static observedAttributes = ["look", "src", "audio", "audio-gain", "audio-depth", "paused"];
+  static observedAttributes = [
+    "look",
+    "src",
+    "audio",
+    "audio-gain",
+    "audio-depth",
+    "quality",
+    "paused",
+  ];
   /** The running field (undefined while disconnected). */
   field?: ParticleField;
   private design?: LookInput;
@@ -43,6 +54,10 @@ export class ParticleFieldElement extends HTMLElement {
         audio: this.audioInput(),
         audioGain: Number(this.getAttribute("audio-gain") ?? 1),
         audioDepth: this.numberAttribute("audio-depth"),
+        quality: parseQualitySetting(this.getAttribute("quality")),
+        poster: this.getAttribute("poster") ?? undefined,
+        onQualityChange: (level) =>
+          this.dispatchEvent(new CustomEvent("particle-field-quality", { detail: level })),
         interactive: this.hasAttribute("interactive"),
         zoom: this.hasAttribute("zoom"),
         autoplay: this.hasAttribute("paused") ? false : undefined,
@@ -71,6 +86,7 @@ export class ParticleFieldElement extends HTMLElement {
     if (name === "audio") void field.setAudio(this.audioInput()).catch(() => {});
     if (name === "audio-gain") field.audioGain = Number(value ?? 1);
     if (name === "audio-depth") field.audioDepth = this.numberAttribute("audio-depth");
+    if (name === "quality") field.setQuality(parseQualitySetting(value));
     if (name === "paused") {
       if (value === null) field.play();
       else field.pause();

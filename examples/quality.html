@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Quality — Particles Designer embed</title>
+    <link rel="stylesheet" href="./examples.css" />
+    <style>
+      .readout {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px 22px;
+        margin: 12px 0;
+        font-variant-numeric: tabular-nums;
+      }
+      .readout b {
+        color: #cfe6ff;
+      }
+      #more {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 8px;
+        margin-top: 12px;
+      }
+      #more > div {
+        height: 130px;
+        border-radius: 8px;
+        overflow: hidden;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Quality</h1>
+      <p>
+        By default a field watches its own frame times and lowers particles, ribbons and resolution
+        when the device cannot hold about 60 fps, then raises them again when there is headroom. Add
+        load below and watch the level rise; the frame rate recovers.
+      </p>
+      <div id="particles" class="stage"></div>
+      <div class="readout" aria-live="off">
+        <span>Quality level <b id="level">0</b></span>
+        <span>Particles <b id="particle-count">–</b></span>
+        <span>Canvas <b id="canvas-size">–</b></span>
+        <span>Page <b id="fps">–</b> fps</span>
+      </div>
+      <div class="toolbar">
+        <label
+          >Quality
+          <select id="quality">
+            <option value="auto" selected>auto</option>
+            <option value="high">high (as authored)</option>
+            <option value="medium">medium</option>
+            <option value="low">low</option>
+          </select>
+        </label>
+        <button id="add">Add a full-density field</button>
+        <button id="clear">Remove extra fields</button>
+        <span class="status" id="note"></span>
+      </div>
+      <div id="more"></div>
+      <pre>
+new ParticleField("#particles", {
+  look: "galaxy-drift",
+  quality: "auto",              // default; "high" | "medium" | "low" pin a level
+  onQualityChange: (level) => console.log("quality level", level),
+  poster: "/fallback.jpg",      // shown instead of the field if WebGL2 is unavailable
+});
+field.setQuality("low");        // e.g. from a battery-saver switch
+field.qualityLevel;             // 0 = as authored, higher = lighter</pre>
+    </main>
+    <script type="module">
+      import { ParticleField, LOOKS } from "../dist-embed/particles-designer.js";
+
+      const galaxy = LOOKS.find((look) => look.id === "galaxy-drift");
+      // The same look at the densest setting (200,000 particles): a heavy load.
+      const dense = { ...galaxy, settings: { ...galaxy.settings, "Particle density": 2 } };
+      const $ = (id) => document.getElementById(id);
+      const field = new ParticleField("#particles", {
+        look: galaxy,
+        onQualityChange: (level) => {
+          $("note").textContent = `Quality level changed to ${level}.`;
+        },
+      });
+      window.field = field;
+      $("quality").onchange = (event) => field.setQuality(event.target.value);
+
+      const extra = [];
+      $("add").onclick = () => {
+        if (extra.length >= 8) {
+          $("note").textContent = "Browsers limit the number of WebGL fields on one page.";
+          return;
+        }
+        const cell = document.createElement("div");
+        $("more").append(cell);
+        extra.push({ cell, field: new ParticleField(cell, { look: dense }) });
+      };
+      $("clear").onclick = () => {
+        for (const { cell, field: extraField } of extra.splice(0)) {
+          extraField.destroy();
+          cell.remove();
+        }
+      };
+
+      let frames = 0,
+        since = performance.now();
+      const tick = (now) => {
+        frames++;
+        if (now - since >= 500) {
+          $("fps").textContent = Math.round((frames * 1000) / (now - since));
+          $("level").textContent = field.qualityLevel;
+          $("particle-count").textContent = field.particleCount.toLocaleString();
+          $("canvas-size").textContent = `${field.canvas.width}×${field.canvas.height}`;
+          frames = 0;
+          since = now;
+        }
+        requestAnimationFrame(tick);
+      };
+      requestAnimationFrame(tick);
+    </script>
+  </body>
+</html>
