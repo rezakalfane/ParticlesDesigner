@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Particles Designer</title>
+  </head>
+  <body>
+    <canvas id="field" aria-label="Audio reactive three dimensional particle sculpture"></canvas>
+    <header>
+      <div>
+        <span>ABSOLUMONT / Particles Designer</span>
+        <h1>Particle field</h1>
+      </div>
+      <div class="header-actions">
+        <button id="design-undo" type="button" disabled>Undo</button>
+        <button id="design-redo" type="button" disabled>Redo</button>
+        <button id="hide">Hide controls · H</button>
+      </div>
+    </header>
+    <aside id="panel">
+      <div class="intro">
+        A sculpture made of light.<br />Play its shape, then let sound move it.
+      </div>
+      <fieldset>
+        <legend>Shapes</legend>
+        <div id="shape-banks" class="lab-bank-nav" role="group" aria-label="Shape banks"></div>
+        <div id="lab-shapes" class="lab-bank-slots"></div>
+        <p class="hint">Change the shape while keeping your colors, motion and viewpoint.</p>
+        <label><input id="journey" type="checkbox" /> Automatic shape journey</label>
+        <label class="control">
+          <span>Journey time</span><output id="journey-time-value" for="journey-time">75 s</output>
+          <input
+            id="journey-time"
+            aria-label="Journey time"
+            type="range"
+            min="10"
+            max="180"
+            step="1"
+            value="75"
+          />
+        </label>
+        <p class="hint">Time for a full journey through the shapes and back. Lower is faster.</p>
+      </fieldset>
+      <fieldset class="control-group">
+        <legend>Presets</legend>
+        <p class="hint">Load a complete look: shape, colors, motion, lighting and viewpoint.</p>
+        <div id="preset-banks" class="lab-bank-nav" role="group" aria-label="Preset banks"></div>
+        <div id="lab-presets" class="lab-bank-slots"></div>
+      </fieldset>
+      <label
+        >Systems<select id="systems">
+          <option value="1" selected>One system</option>
+          <option value="4">Four systems · 2×2</option>
+        </select></label
+      >
+      <p class="hint">
+        Four view: selected formation, orbital, tidal, and helix. Controls and audio are shared;
+        density is the total across all systems.
+      </p>
+      <fieldset class="control-group">
+        <legend>Particles & shape</legend>
+        <div id="controls-particles"></div>
+      </fieldset>
+      <fieldset class="control-group">
+        <legend>Light & color</legend>
+        <div id="controls-light"></div>
+      </fieldset>
+      <fieldset class="control-group">
+        <legend>Ribbons</legend>
+        <div id="controls-ribbons"></div>
+      </fieldset>
+      <fieldset class="control-group">
+        <legend>Attractors</legend>
+        <div id="controls-attractors"></div>
+      </fieldset>
+      <fieldset class="control-group">
+        <legend>Point of view</legend>
+        <div id="controls-view"></div>
+        <p>
+          Angle sliders hold their axis by stopping its automatic rotation. Drag and scroll remain
+          available.
+        </p>
+      </fieldset>
+      <fieldset class="control-group">
+        <legend>Motion & rotation</legend>
+        <div id="controls-motion"></div>
+      </fieldset>
+      <fieldset class="control-group">
+        <legend>Shockwaves</legend>
+        <div id="controls-shock"></div>
+        <button id="burst">Send ripple · Space</button>
+      </fieldset>
+      <fieldset>
+        <legend>Collapse → explode → reform</legend>
+        <div id="controls-cycle"></div>
+        <button id="cycle">Launch cycle · E</button>
+        <label><input id="cycle-audio" type="checkbox" /> Trigger cycle from audio accents</label>
+        <p id="cycle-status" role="status">Ready</p>
+      </fieldset>
+      <fieldset>
+        <legend>Audio</legend>
+        <div id="controls-audio"></div>
+        <label
+          >Input<select id="input">
+            <option value="demo">Demo pulse (silent)</option>
+            <option value="microphone">Mac microphone</option>
+            <option value="file">Audio file</option>
+            <option value="off">No modulation</option>
+          </select></label
+        >
+        <label class="file-label">Load audio<input id="file" type="file" accept="audio/*" /></label>
+        <audio id="audio" controls loop></audio>
+        <label
+          >Input gain <output id="input-gain-value" for="input-gain">1.00×</output>
+          <input
+            id="input-gain"
+            aria-label="Input gain"
+            type="range"
+            min="0"
+            max="8"
+            step="0.05"
+            value="1"
+          />
+        </label>
+        <div class="meters">
+          <label>Low<meter id="low" min="0" max="1" value="0"></meter></label
+          ><label>Mid<meter id="mid" min="0" max="1" value="0"></meter></label
+          ><label>High<meter id="high" min="0" max="1" value="0"></meter></label>
+        </div>
+        <p id="status" role="status">Silent demo modulation</p>
+      </fieldset>
+      <div class="actions">
+        <button id="pause">Pause</button><button id="fullscreen">Fullscreen</button>
+      </div>
+      <p class="hint">
+        Drag the field to orbit. Scroll to zoom.<br />1–9 formation · H controls · F fullscreen
+      </p>
+    </aside>
+    <form id="design-prompt" class="design-prompt">
+      <div class="design-heading">
+        <select id="design-engine" aria-label="Model and reasoning effort" disabled>
+          <option>Connecting to AI…</option>
+        </select>
+        <label for="design-request">Imagine a particle field</label>
+        <button
+          id="design-toggle"
+          class="design-toggle"
+          type="button"
+          aria-controls="design-body"
+          aria-expanded="false"
+          aria-label="Expand prompt"
+          title="Expand prompt"
+        >
+          <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
+            <path d="M3.5 10 8 5.5 12.5 10" fill="none" stroke="currentColor" stroke-width="1.6" />
+          </svg>
+        </button>
+      </div>
+      <div id="design-body" hidden>
+        <textarea
+          id="design-request"
+          rows="2"
+          maxlength="2000"
+          placeholder="Golden sand flowing over tall dunes, soft light, a low sweeping view…"
+        ></textarea>
+        <div class="design-actions">
+          <button id="design-generate" type="submit">Create design</button>
+          <button
+            id="design-attach"
+            type="button"
+            title="Attach a photo as inspiration (or paste one)"
+          >
+            Photo
+          </button>
+          <input id="design-image-file" type="file" accept="image/*" hidden />
+          <span id="design-image" class="design-image" hidden>
+            <img alt="Inspiration photo" />
+            <button id="design-image-remove" type="button" aria-label="Remove photo">×</button>
+          </span>
+          <span>Enter to create · Shift+Enter newline · ↑↓ history · paste a photo</span>
+        </div>
+      </div>
+      <p id="design-status" role="status" aria-live="polite"></p>
+    </form>
+    <footer>
+      <span
+        ><span id="stats">Starting WebGL2…</span
+        ><span id="design-model"> · AI connecting…</span></span
+      ><span>Standalone generator study</span>
+    </footer>
+    <button id="reveal" hidden>Show controls · H</button>
+    <script type="module" src="/src/designer/main.ts"></script>
+  </body>
+</html>

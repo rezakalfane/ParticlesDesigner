@@ -1,0 +1,9 @@
+node_modules/
+dist/
+test-report/
+.DS_Store
+*.log
+
+# Server-only local credentials
+.env.local
+.env.*.local
