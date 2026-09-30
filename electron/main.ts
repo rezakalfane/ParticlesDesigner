@@ -6,7 +6,7 @@
  *   slots.json   saved Preset/Shape library (shared with `npm run dev`)
  *   config.env   optional OPENAI_API_KEY / OPENAI_MODEL / OPENAI_REASONING_EFFORT for AI generation
  */
-import { app, BrowserWindow, Menu, session, shell } from "electron";
+import { app, BrowserWindow, Menu, screen, session, shell } from "electron";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { createServer } from "node:net";
 import { join } from "node:path";
@@ -74,6 +74,9 @@ function openWindow() {
     minHeight: 600,
     backgroundColor: "#000000",
     title: APP_NAME,
+    // No title bar: content runs to the top edge; the traffic lights appear only on hover.
+    titleBarStyle: "hidden",
+    trafficLightPosition: { x: 14, y: 12 },
     webPreferences: { backgroundThrottling: false },
   });
   win.setMenuBarVisibility(false);
@@ -82,6 +85,29 @@ function openWindow() {
     void shell.openExternal(url);
     return { action: "deny" };
   });
+  // Thin invisible strip so the window can still be dragged without a title bar. It has to be a
+  // real element: Chromium ignores -webkit-app-region on pseudo-elements.
+  win.webContents.on("did-finish-load", () => {
+    void win?.webContents.executeJavaScript(`(() => {
+      if (document.getElementById("electron-drag")) return;
+      const d = document.createElement("div");
+      d.id = "electron-drag";
+      d.style.cssText = "position:fixed;top:0;left:0;right:0;height:28px;z-index:2147483647;-webkit-app-region:drag";
+      document.body.appendChild(d);
+    })()`);
+  });
+  if (process.platform === "darwin") {
+    const w = win;
+    w.setWindowButtonVisibility(false);
+    const timer = setInterval(() => {
+      if (w.isDestroyed()) return;
+      const { x, y } = screen.getCursorScreenPoint();
+      const b = w.getBounds();
+      const near = x >= b.x && x <= b.x + 140 && y >= b.y && y <= b.y + 44;
+      w.setWindowButtonVisibility(near || w.isFullScreen());
+    }, 100);
+    w.on("closed", () => clearInterval(timer));
+  }
   win.on("closed", () => (win = null));
   void win.loadURL(origin);
 }
