@@ -1,5 +1,7 @@
 # Particles Designer
 
+<a href="https://rezakalfane.github.io/ParticlesDesigner/"><img src="docs/media/looks.webp" alt="Particle looks morphing: Deep sea, Galaxy drift, Neon weave" width="720"></a>
+
 **ABSOLUMONT / Particles Designer** — author luminous GPU particle fields in the
 browser: 1k–200k procedural WebGL2 points forming built-in, baked or AI-invented
 shapes, with light, ribbons, attractors, motion, shockwaves, a collapse → explode →
@@ -9,6 +11,13 @@ and play it all from a ROTO-CONTROL. Then drop any look into a web page with the
 embed kit.
 
 Originally built inside LUMEN; this repository is the standalone tool.
+
+**Live:** [Designer](https://rezakalfane.github.io/ParticlesDesigner/) ·
+[embed examples](https://rezakalfane.github.io/ParticlesDesigner/examples/). The
+hosted Designer runs fully in the browser: saved slots stay in that browser, and AI
+generation needs the local host (below).
+
+![The Designer: preset banks, shapes, controls and the AI prompt bar](docs/media/designer.webp)
 
 ## Quick start
 
@@ -57,19 +66,20 @@ no dependencies) and `npm run examples` opens the sample pages. See
 
 ## Scripts
 
-| Command                  | What it does                                                    |
-| ------------------------ | --------------------------------------------------------------- |
-| `npm run dev`            | Vite dev server with the Designer host APIs (LAN-exposed)       |
-| `npm run build`          | Typecheck + static build in `dist/`                             |
-| `npm run preview`        | Serve the build with the host APIs                              |
-| `npm test`               | Unit tests (Vitest)                                             |
-| `npm run build:embed`    | Build the embed kit into `dist-embed/` (ESM, IIFE, types)       |
-| `npm run examples`       | Build the kit and open the embed examples                       |
-| `npm run verify`         | Format check, typecheck, tests, app and embed builds            |
-| `npm run bake`           | Bake the saved slot library into factory shapes/looks           |
-| `npm run roto:presets`   | Regenerate the ROTO-CONTROL setup files in `roto/`              |
-| `npm run rehearse:roto`  | Browser rehearsal with simulated Web MIDI (needs `npm run dev`) |
-| `npm run rehearse:embed` | Browser rehearsal of every embed example (needs `npm run dev`)  |
+| Command                  | What it does                                                      |
+| ------------------------ | ----------------------------------------------------------------- |
+| `npm run dev`            | Vite dev server with the Designer host APIs (LAN-exposed)         |
+| `npm run build`          | Typecheck + static build in `dist/`                               |
+| `npm run preview`        | Serve the build with the host APIs                                |
+| `npm test`               | Unit tests (Vitest)                                               |
+| `npm run build:embed`    | Build the embed kit into `dist-embed/` (ESM, IIFE, types)         |
+| `npm run build:site`     | App + kit + examples as one static site in `dist/` (GitHub Pages) |
+| `npm run examples`       | Build the kit and open the embed examples                         |
+| `npm run verify`         | Format check, typecheck, tests, app and embed builds              |
+| `npm run bake`           | Bake the saved slot library into factory shapes/looks             |
+| `npm run roto:presets`   | Regenerate the ROTO-CONTROL setup files in `roto/`                |
+| `npm run rehearse:roto`  | Browser rehearsal with simulated Web MIDI (needs `npm run dev`)   |
+| `npm run rehearse:embed` | Browser rehearsal of every embed example (needs `npm run dev`)    |
 
 ## Layout
 
