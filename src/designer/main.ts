@@ -1,6 +1,7 @@
 import { connectDesignerRoto } from "./roto";
 import { createSlotDialog, createSlotMenu, onLongPress } from "./dialog";
 import { createEmbedDialog } from "./embedDialog";
+import { dismissSplash } from "./splash";
 import {
   importImpact,
   libraryFileName,
@@ -1078,6 +1079,7 @@ function startRenderer() {
     updateSystems();
   } catch (e) {
     status.textContent = String(e);
+    dismissSplash(); // show the error
   }
 }
 startRenderer();
@@ -1262,6 +1264,7 @@ function frame(now: number) {
         );
       });
     } else renderer.render(time, visible);
+    dismissSplash(); // first frame drawn
   }
   frames++;
   if (now - reportAt > 500) {
