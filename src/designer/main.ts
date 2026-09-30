@@ -26,7 +26,7 @@ import {
 } from "./design";
 import { DesignHistory } from "./history";
 import "./style.css";
-import { SHAPE_BANKS, PRESET_BANKS } from "./banks";
+import { SHAPE_BANKS, PRESET_BANKS, LAB_BANK_COUNT, LAB_BANK_SIZE, bankLabel } from "./banks";
 import { BAKED_SHAPE_SLOTS } from "./bakedLibrary";
 import { BAKED_LOOK_SLOTS } from "../looks/particleBakedLooks";
 import {
@@ -345,7 +345,7 @@ function mountBanks<T extends { name: string }>(
     grid = el(gridId);
   const tabs = banks.map((_, bank) => {
     const button = document.createElement("button");
-    button.textContent = `Bank ${bank + 1}`;
+    button.textContent = bankLabel(kind === "Shape" ? "shape" : "preset", bank);
     button.setAttribute("aria-label", `${kind} bank ${bank + 1}`);
     button.onclick = () => {
       selectedBank = bank;
@@ -361,7 +361,7 @@ function mountBanks<T extends { name: string }>(
     const builtIn = builtIns[bank][slot];
     const confirmed = await slotDialog({
       title: `Delete ${kind.toLowerCase()}?`,
-      description: `Delete “${item.name}” from bank ${bank + 1}, slot ${slot + 1}? ${
+      description: `Delete “${item.name}” from ${bankLabel(kind === "Shape" ? "shape" : "preset", bank)}, slot ${slot + 1}? ${
         builtIn ? `The built-in “${builtIn.name}” comes back.` : "The slot becomes empty."
       } This cannot be undone.`,
       action: "Delete",
@@ -439,7 +439,7 @@ function mountBanks<T extends { name: string }>(
             const confirmed = await slotDialog({
               title: `Replace ${kind.toLowerCase()}?`,
               name,
-              description: `Replace “${name}” in bank ${selectedBank + 1}, slot ${slot + 1} with the current design?`,
+              description: `Replace “${name}” in ${bankLabel(kind === "Shape" ? "shape" : "preset", selectedBank)}, slot ${slot + 1} with the current design?`,
               action: "Replace",
             });
             if (!confirmed) return;
@@ -545,7 +545,7 @@ async function persistSlot(
   }
   userSlots = next;
   el("design-status").textContent =
-    `${item.name} saved in ${kind === "shapes" ? "Shape" : "Preset"} bank ${bank + 1}, slot ${slot + 1}` +
+    `${item.name} saved in ${bankLabel(kind === "shapes" ? "shape" : "preset", bank)}, slot ${slot + 1}` +
     (savedOnHost ? "." : " in this browser only (the host library is unavailable).");
   return true;
 }
@@ -1479,7 +1479,7 @@ window.addEventListener("keydown", (event) => {
     restoreDesign(event.shiftKey ? designHistory.redo() : designHistory.undo());
   }
 });
-/** The Designer opens on Galaxy drift (Preset bank 1, slot 2), shown at once. */
+/** The Designer opens on Galaxy drift (P1, slot 2), shown at once. */
 const STARTUP_PRESET = { id: "galaxy-drift", bank: 0, slot: 1 };
 const startupLook = PRESET_BANKS[STARTUP_PRESET.bank][STARTUP_PRESET.slot];
 if (startupLook?.id === STARTUP_PRESET.id) {
@@ -1778,7 +1778,9 @@ const disposeDesignerRoto = connectDesignerRoto(
           ? "shape"
           : undefined;
       if (kind)
-        return key.endsWith("bank") ? rotoCandidate[kind].bank / 3 : rotoCandidate[kind].slot / 15;
+        return key.endsWith("bank")
+          ? rotoCandidate[kind].bank / (LAB_BANK_COUNT - 1)
+          : rotoCandidate[kind].slot / (LAB_BANK_SIZE - 1);
       if (key === "Blackout") return Number(designerBlackout);
       if (key === "Pause") return Number(paused);
       if (key === "File play") return Number(!audio.paused);
@@ -1800,7 +1802,7 @@ const disposeDesignerRoto = connectDesignerRoto(
           : undefined;
       if (kind) {
         rotoCandidate[kind][key.endsWith("bank") ? "bank" : "slot"] = Math.round(
-          normalized * (key.endsWith("bank") ? 3 : 15),
+          normalized * (key.endsWith("bank") ? LAB_BANK_COUNT - 1 : LAB_BANK_SIZE - 1),
         );
         browseCandidate(kind);
         return;
@@ -1835,7 +1837,11 @@ const disposeDesignerRoto = connectDesignerRoto(
       if (key === "Previous" || key === "Next") {
         const c = rotoCandidate.preset,
           step = key === "Next" ? 1 : -1;
-        for (let i = c.bank * 16 + c.slot + step; i >= 0 && i < 64; i += step) {
+        for (
+          let i = c.bank * 16 + c.slot + step;
+          i >= 0 && i < LAB_BANK_COUNT * LAB_BANK_SIZE;
+          i += step
+        ) {
           if (presetBanks[Math.floor(i / 16)][i % 16]) {
             c.bank = Math.floor(i / 16);
             c.slot = i % 16;
@@ -1902,7 +1908,7 @@ const disposeDesignerRoto = connectDesignerRoto(
         .map((kind) => {
           const { bank, slot } = rotoCandidate[kind];
           const item = (kind === "preset" ? presetBanks : shapeBanks)[bank][slot];
-          return `${kind === "preset" ? "Look" : "Shape"} ${bank + 1}:${slot + 1} · ${item?.name ?? "Empty"}`;
+          return `${bankLabel(kind, bank)}:${slot + 1} · ${item?.name ?? "Empty"}`;
         })
         .join(" / ");
     },

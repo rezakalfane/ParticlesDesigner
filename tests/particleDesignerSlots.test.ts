@@ -67,7 +67,9 @@ describe("Designer shared slot library", () => {
     expect(Object.keys(data.shapes)).toEqual(["40"]);
     // Deleting an empty slot is harmless; invalid slots are rejected.
     expect((await call(api, "PUT", { kind: "shapes", slot: 5, item: null })).status).toBe(200);
-    expect((await call(api, "PUT", { kind: "shapes", slot: 64, item: null })).status).toBe(400);
+    expect((await call(api, "PUT", { kind: "shapes", slot: 128, item: null })).status).toBe(400);
+    // Eight banks: P8 / S8 slot 16 is key 127.
+    expect((await call(api, "PUT", { kind: "presets", slot: 127, item: preset })).status).toBe(200);
     expect((await call(api, "PUT", { kind: "shapes", slot: "x", item: null })).status).toBe(400);
   });
   it("rejects cross-origin and invalid writes", async () => {
@@ -75,7 +77,7 @@ describe("Designer shared slot library", () => {
     const api = createDesignerSlotsApi(file);
     const put = { kind: "presets", slot: 1, item: preset };
     expect((await call(api, "PUT", put, "https://elsewhere.test")).status).toBe(403);
-    expect((await call(api, "PUT", { ...put, slot: 64 })).status).toBe(400);
+    expect((await call(api, "PUT", { ...put, slot: 128 })).status).toBe(400);
     expect((await call(api, "PUT", { ...put, kind: "scenes" })).status).toBe(400);
     expect((await call(api, "PUT", { ...put, item: { ...preset, formation: 100 } })).status).toBe(
       400,

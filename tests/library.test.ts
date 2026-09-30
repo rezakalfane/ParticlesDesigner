@@ -35,7 +35,7 @@ describe("saved library import/export", () => {
     );
     expect(look.type === "look" && look.design.name).toBe("Lissajous bloom");
     expect(() => parseImport({ version: 2, presets: {} })).toThrow(/version/);
-    expect(() => parseImport({ version: 1, presets: { "99": preset } })).toThrow();
+    expect(() => parseImport({ version: 1, presets: { "128": preset } })).toThrow();
     expect(() => parseImport({ hello: "world" })).toThrow();
   });
   it("reports slots that replace saved work vs cover built-ins", () => {

@@ -53,6 +53,7 @@ preserves the image state. Pause and Blackout are runtime-only, not undo entries
 | MOVE                                  | Motion toggle                                        | Journey toggle    | —                  |
 | AUDIO                                 | Audio contribution toggle                            | File play/pause   | —                  |
 
+Bank knobs have eight detents labelled P1–P8 (presets) and S1–S8 (shapes); slot knobs sixteen.
 Bank/slot knobs only browse. Apply uses the existing Designer selection transition.
 Empty slots reject visibly, never invoke Save. Previous/Next cross banks and clamp
 at the ends. Candidate names appear in the MIDI strip; hardware labels remain

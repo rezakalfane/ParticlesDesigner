@@ -6,7 +6,7 @@
 browser: 1k–200k procedural WebGL2 points forming built-in, baked or AI-invented
 shapes, with light, ribbons, attractors, motion, shockwaves, a collapse → explode →
 reform cycle and audio reactivity. Every factory look is ready to perform: audio,
-ripples and the cycle are all available. Browse four banks of factory looks and shapes,
+ripples and the cycle are all available. Browse eight banks of looks (P1–P8) and shapes (S1–S8),
 save your own, describe a field in words (optionally with an inspiration photo),
 and play it all from a ROTO-CONTROL. Then drop any look into a web page with the
 embed kit.

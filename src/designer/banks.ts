@@ -1,8 +1,16 @@
 import { BAKED_SHAPE_SLOTS } from "./bakedLibrary";
-import { PARTICLE_FACTORY_SLOTS } from "../looks/particleFactory";
+import {
+  PARTICLE_FACTORY_BANK_COUNT,
+  PARTICLE_FACTORY_BANK_SIZE,
+  PARTICLE_FACTORY_SLOTS,
+} from "../looks/particleFactory";
 import { BAKED_FORMATION_START, BAKED_SHAPES } from "../engine/bakedShapes";
-export const LAB_BANK_COUNT = 4;
-export const LAB_BANK_SIZE = 16;
+/** Eight banks of sixteen: presets P1–P8, shapes S1–S8. */
+export const LAB_BANK_COUNT = PARTICLE_FACTORY_BANK_COUNT;
+export const LAB_BANK_SIZE = PARTICLE_FACTORY_BANK_SIZE;
+/** Short bank label: P1…P8 for presets, S1…S8 for shapes. */
+export const bankLabel = (kind: "preset" | "shape", bank: number) =>
+  `${kind === "preset" ? "P" : "S"}${bank + 1}`;
 export function makeLabBanks<T>(items: readonly T[]): (T | null)[][] {
   if (items.length > LAB_BANK_COUNT * LAB_BANK_SIZE)
     throw new Error("Particle lab bank capacity exceeded");

@@ -1,3 +1,4 @@
+import { LAB_BANK_COUNT, bankLabel } from "./banks";
 /** One map for hardware exports, decoding, feedback and the Designer page strip. */
 export interface DesignerPage {
   name: string;
@@ -187,7 +188,7 @@ const labels: Record<string, string> = {
 };
 export const designerSteps = (key: string) =>
   key.endsWith(" bank")
-    ? 4
+    ? LAB_BANK_COUNT
     : key.endsWith(" slot")
       ? 16
       : key === "Systems"
@@ -219,11 +220,15 @@ export function designerSetupDocuments() {
           hapticSteps: steps,
           stepNames: Array.from({ length: 16 }, (_, i) => {
             const names =
-              key === "Systems"
-                ? ["1 field", "4 fields"]
-                : key === "Input mode"
-                  ? ["Demo", "Mic", "File", "Off"]
-                  : undefined;
+              key === "Preset bank" || key === "Shape bank"
+                ? Array.from({ length: LAB_BANK_COUNT }, (_, b) =>
+                    bankLabel(key === "Preset bank" ? "preset" : "shape", b),
+                  )
+                : key === "Systems"
+                  ? ["1 field", "4 fields"]
+                  : key === "Input mode"
+                    ? ["Demo", "Mic", "File", "Off"]
+                    : undefined;
             return names ? (names[i] ?? "") : i < steps ? String(i + 1) : "";
           }),
         };

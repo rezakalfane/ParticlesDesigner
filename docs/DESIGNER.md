@@ -181,15 +181,17 @@ Deep sea was updated from the operator's current lab view: angles 10.2° / 18.9�
 light 0.45, softness 0.26 and ribbons 0.81/0.62. Shockwaves are enabled with
 strength 0.7; audio depth and all automatic rotation axes remain zero.
 
-Shapes and Presets each have four independent banks of sixteen fixed slots.
-Bank 1 contains the existing sixteen entries in their original order; Banks 2–4
-are empty. Empty slots are disabled and never substitute another item. Bank
+Presets and Shapes each have eight independent banks of sixteen fixed slots,
+labelled P1–P8 and S1–S8. P1/S1 hold the original sixteen entries in order, P2 the
+studies, then baked presets; the remaining slots are empty and save the current
+design when clicked. A hollow ring marks a built-in slot, a filled dot a saved one
+(hover for × or press Delete to remove it and restore the built-in). Bank
 browsing is local navigation and changes no visual settings, shape, journey,
 or motion. Shape identities remain renderer indices, independent of bank slots.
 
 The factory catalog is `src/looks/particleFactory.ts` (the sixteen looks in
 `particleLooks.ts`, the studies in `particleStudies.ts` and baked presets in
-`particleBakedLooks.ts`): four banks of sixteen. `src/designer/presets.ts` keeps
+`particleBakedLooks.ts`): eight banks of sixteen (P1–P8). `src/designer/presets.ts` keeps
 `LAB_PRESETS` for the Designer. To turn saved presets into factory slots, bake
 them (below).
 
@@ -199,14 +201,14 @@ color drift 0.52, variety 0.64, Y rotation 0.04, view −8.1° / 33.2° / −22�
 
 ### Solar system study
 
-Presets → Bank 2 → slot 1 contains the Solar system study. Its
-matching shape is in Shapes → Bank 2 → slot 1 (appended identity 16). A golden
+P2 → slot 1 contains the Solar system study. Its
+matching shape is in S2 → slot 1 (appended identity 16). A golden
 sun, eight independently orbiting planets, Saturn rings and fine orbital dust
 use the same GPU particle surface. Motion controls orbital speed; viewpoint,
 color drift, dispersion and other existing controls remain editable. Like every
 study, it is part of the factory catalog.
 
-Bank 2 slots 2–5 add Earth & Moon, Jovian giant, Saturn, and Infinite black hole,
+P2 / S2 slots 2–5 add Earth & Moon, Jovian giant, Saturn, and Infinite black hole,
 with matching shapes. These are procedural particle interpretations: Earth uses
 continent-like noise rather than a geographic map; the black hole uses an
 art-directed lensed arc, central shadow and foreground disk, not ray tracing.
@@ -215,7 +217,7 @@ behind the planet. All five studies use existing controls.
 
 ### Mystical studies
 
-Designer Bank 2 slots 6–9 contain Cosmic lotus, Celestial eye, Astral portal, and
+P2 / S2 slots 6–9 contain Cosmic lotus, Celestial eye, Astral portal, and
 Eclipse crown, with matching shapes (identities 21–24). The lotus breathes in
 three petal tiers around a pearl; the eye has radial iris filaments and a golden
 outline; the portal has twelve counter-rotating gates; the eclipse has a dark
@@ -235,7 +237,7 @@ and device errors appear in the status line.
 
 ### Aether Storm
 
-Bank 2, slot 10 adds Aether storm (shape 25): six continuously folded ribbons,
+P2 / S2 slot 10 adds Aether storm (shape 25): six continuously folded ribbons,
 three precessing orbital hoops, a breathing core and sparse surrounding dust.
 The preset moves without audio and starts at Audio depth 0.35 for live input.
 Select Mac microphone and adjust Input gain for the room; Space sends a ripple
@@ -244,7 +246,7 @@ It uses the same bounded particle renderer and direct morph path as other studie
 
 ### Liquid and flame
 
-Bank 2 slots 11–12 contain Liquid mercury (shape 26) and Astral flame (shape 27).
+P2 / S2 slots 11–12 contain Liquid mercury (shape 26) and Astral flame (shape 27).
 Mercury is an analytically deformed surface with moving silver-blue reflection
 bands and small satellite droplets. Flame uses seven tapered, curling plumes
 and sparse embers that fade at their wrap boundary. These are procedural
@@ -253,7 +255,7 @@ direct shape morphs, and use no accumulated trails by default.
 
 ### Silken Currents
 
-Bank 2 slot 13 (shape 28) is inspired by flowing blue and champagne fiber fields:
+P2 / S2 slot 13 (shape 28) is inspired by flowing blue and champagne fiber fields:
 220 seeded filaments braid across a wide composition with a sparse layer of
 larger pearl-like particles. Strand geometry is generated directly on the GPU,
 without history trails. The authored palette responds to Color drift and Color
@@ -281,7 +283,7 @@ adds no draw calls. Existing presets retain their original strand width.
 
 ### Astral Veil
 
-Bank 2 slot 14 saves the 00:15 screenshot variation of Silken Currents without
+P2 / S2 slot 14 saves the 00:15 screenshot variation of Silken Currents without
 replacing slot 13. It uses 85,150 particles, six-color variety with 0.90 drift,
 9.03-second trails at 16× width and 0.17 brightness, 3.02× heads, Light 0.04,
 active orbiting attractors (attraction 0.22), 0.58 motion and 0.08 Z rotation.
@@ -290,7 +292,7 @@ the collapse/explode cycle remains available.
 
 ### Sahara Drift and prompt authoring
 
-Sahara Drift (Bank 2 slot 15, formation 29) adds a three-dimensional dune field:
+Sahara Drift (P2 / S2 slot 15, formation 29) adds a three-dimensional dune field:
 curved crests, variable heights, steep leeward slopes, fine ripples and moving
 sand grains. Directional surface lighting brings out the relief. Existing Moon
 Dunes remains unchanged.

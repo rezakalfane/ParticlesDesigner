@@ -1,7 +1,7 @@
 import { performable, type ParticleLook } from "./particleLooks";
 /**
  * Particles Designer studies in the factory catalog. They follow the sixteen
- * PARTICLE_LOOKS, starting at Preset Bank 2 (see particleFactory.ts).
+ * PARTICLE_LOOKS, starting at P2 (see particleFactory.ts).
  */
 export const PARTICLE_STUDIES: readonly ParticleLook[] = (<ParticleLook[]>[
   {

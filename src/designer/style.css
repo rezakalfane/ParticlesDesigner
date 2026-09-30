@@ -99,6 +99,10 @@ button[aria-pressed="true"] {
   color: #112337;
   border-color: #c5def5;
 }
+/* Keep selected buttons light on hover (the generic hover background is dark). */
+button[aria-pressed="true"]:hover:not(:disabled) {
+  background: #dbeafa;
+}
 button:focus-visible,
 input:focus-visible,
 select:focus-visible {
@@ -279,7 +283,7 @@ footer {
 
 .lab-bank-nav {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(8, minmax(0, 1fr));
   gap: 4px;
   margin-bottom: 10px;
 }
