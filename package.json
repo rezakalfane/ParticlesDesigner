@@ -5,6 +5,7 @@
   "type": "module",
   "description": "ABSOLUMONT Particles Designer — author GPU particle fields (WebGL2) with presets, shapes, AI prompts and ROTO-CONTROL.",
   "author": "Reza Kalfane, Absolumont Collective",
+  "license": "MIT",
   "scripts": {
     "dev": "vite --host",
     "build": "tsc --noEmit && vite build",

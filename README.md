@@ -70,3 +70,7 @@ clock, DOM or audio.
 - Electron packaging (desktop app hosting the same APIs)
 - Documentation site
 - Embed kit: a small library + sample code to drop a particle system into any web page
+
+## License
+
+[MIT](LICENSE) © 2026 Reza Kalfane, Absolumont Collective
