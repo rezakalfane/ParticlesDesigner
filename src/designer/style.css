@@ -67,12 +67,6 @@ header .brand span {
   font-size: 10px;
   letter-spacing: 0.32em;
 }
-h1 {
-  margin: 5px 0 0;
-  font-size: 27px;
-  font-weight: 500;
-  letter-spacing: -1px;
-}
 aside {
   position: fixed;
   top: 118px;
@@ -299,9 +293,6 @@ footer {
     left: 20px;
     right: 20px;
     top: 20px;
-  }
-  h1 {
-    font-size: 22px;
   }
   aside {
     top: auto;

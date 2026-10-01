@@ -21,6 +21,17 @@ h1 {
 a {
   color: #8fc7ff;
 }
+/* Back links at the top of every example page. */
+.crumbs {
+  font-size: 14px;
+  color: #6b727c;
+}
+.crumbs a {
+  text-decoration: none;
+}
+.crumbs a:hover {
+  text-decoration: underline;
+}
 code,
 pre {
   font-family: ui-monospace, "SF Mono", Menlo, monospace;
