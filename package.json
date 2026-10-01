@@ -62,7 +62,7 @@
     "rehearse:boot": "node scripts/rehearse-boot.mjs",
     "rehearse:quality": "node scripts/rehearse-quality.mjs",
     "prepublishOnly": "npm run verify",
-    "electron:build": "npm run build && node scripts/build-electron.mjs",
+    "electron:build": "npm run build:site && node scripts/build-electron.mjs",
     "electron:dev": "npm run electron:build && electron .",
     "icon": "electron scripts/generate-icon.mjs",
     "dist:mac": "npm run electron:build && electron-builder --mac --arm64"
