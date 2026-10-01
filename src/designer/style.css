@@ -43,6 +43,30 @@ header span {
   color: #a8b7ca;
   font-size: 12px;
 }
+/* Vectrex wordmark (index.html), same stroke style as the boot splash. */
+header .brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+header .brand .vectrex {
+  height: 12px;
+  width: auto;
+  overflow: visible;
+  fill: none;
+  stroke: #dfe6ef;
+  stroke-width: 1.25px;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  filter: drop-shadow(0 0 2px #dfe6ef);
+}
+header .brand .vectrex path {
+  vector-effect: non-scaling-stroke;
+}
+header .brand span {
+  font-size: 10px;
+  letter-spacing: 0.32em;
+}
 h1 {
   margin: 5px 0 0;
   font-size: 27px;

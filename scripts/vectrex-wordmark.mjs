@@ -63,7 +63,7 @@ let pen = null;
 
 // Pad by one unit so round caps and the glow are not clipped.
 const width = text.length * advance - spacing;
-const label = text.charAt(0) + text.slice(1).toLowerCase();
+const label = text.toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase());
 console.log(
   `<svg class="vectrex" viewBox="-1 -1 ${width + 2} 12" role="img" aria-label="${label}">` +
     `<path d="${d}" /></svg>`,

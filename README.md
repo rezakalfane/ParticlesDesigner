@@ -14,9 +14,11 @@ embed kit.
 Originally built inside LUMEN; this repository is the standalone tool.
 
 **Live:** [Designer](https://rezakalfane.github.io/ParticlesDesigner/) ·
-[embed examples](https://rezakalfane.github.io/ParticlesDesigner/examples/). The
+[embed examples](https://rezakalfane.github.io/ParticlesDesigner/examples/) ·
+[Mac app](https://github.com/rezakalfane/ParticlesDesigner/releases/latest) (the `.dmg` on
+each release; see [docs/ELECTRON.md](docs/ELECTRON.md) for the first launch). The
 hosted Designer runs fully in the browser: saved slots stay in that browser, and AI
-generation needs the local host (below).
+generation needs the local host (below) or the Mac app.
 
 ![The Designer: preset banks, shapes, controls and the AI prompt bar](https://raw.githubusercontent.com/rezakalfane/ParticlesDesigner/main/docs/media/designer.webp)
 
@@ -103,6 +105,9 @@ and on jsDelivr. See [docs/EMBED.md](https://github.com/rezakalfane/ParticlesDes
 | `npm run rehearse:embed`   | Browser rehearsal of every embed example (needs `npm run dev`)        |
 | `npm run rehearse:boot`    | Reload check: no unstyled flash, splash removed (needs `npm run dev`) |
 | `npm run rehearse:quality` | Adaptive quality on a deliberately slow device (needs `npm run dev`)  |
+| `npm run electron:dev`     | Build the site and the Electron shell, then launch the desktop app    |
+| `npm run dist:mac`         | Package the Mac app (universal, ad-hoc signed) into `release/`        |
+| `npm run icon`             | Regenerate the app icon (`electron/icon.png`, `icon.icns`)            |
 
 ## Releasing
 
@@ -112,7 +117,9 @@ npm version patch && git push --follow-tags
 
 The version tag runs `.github/workflows/publish.yml`: checks, npm publish via trusted
 publishing (with provenance; jsDelivr follows), then a GitHub Release with the
-commits since the previous tag and the kit builds + ROTO-SETUP files attached.
+commits since the previous tag and the kit builds + ROTO-SETUP files attached; a
+macOS job then builds the desktop app and attaches its `.dmg`. Installed apps offer
+the new version on their next launch (see [docs/ELECTRON.md](docs/ELECTRON.md)).
 Preview the notes with `DRY_RUN=1 scripts/github-release.sh v0.1.1`.
 
 ## Layout
@@ -126,9 +133,11 @@ src/roto/             ROTO-CONTROL Web MIDI driver and setup parser
 src/embed/            Embed kit: ParticleField runtime, audio, <particle-field>, snippets
 examples/             Embed sample pages (+ a custom design JSON)
 server/               Dev-host APIs: AI generation (/api/generate), saved slots (/api/slots)
-scripts/              Bake, ROTO preset generation, browser rehearsals
+electron/             Mac app: shell, loopback host serving dist/ + the APIs, update check
+scripts/              Bake, ROTO presets, rehearsals, site/Electron builds, Vectrex wordmark
 roto/                 ROTO-SETUP files (MIDI channels 9–11)
-docs/                 DESIGNER.md (reference), EMBED.md (embed kit), ROTO-CONTROL.md (hardware)
+docs/                 DESIGNER.md (reference), EMBED.md (embed kit), ROTO-CONTROL.md (hardware),
+                      ELECTRON.md (Mac app)
 tests/                Vitest suites
 ```
 
@@ -138,9 +147,8 @@ clock, DOM or audio.
 
 ## Roadmap
 
-- Electron packaging (desktop app hosting the same APIs)
 - Documentation site
-- Publish the embed kit to npm / a CDN
+- Signed and notarized Mac app (Apple Developer ID), with automatic updates
 
 ## License
 
