@@ -65,7 +65,7 @@
     "electron:build": "npm run build:site && node scripts/build-electron.mjs",
     "electron:dev": "npm run electron:build && electron .",
     "icon": "electron scripts/generate-icon.mjs",
-    "dist:mac": "npm run electron:build && electron-builder --mac --arm64"
+    "dist:mac": "npm run electron:build && electron-builder --mac --universal --publish never"
   },
   "devDependencies": {
     "@types/node": "^26.6.0",
@@ -99,13 +99,19 @@
     "mac": {
       "category": "public.app-category.graphics-design",
       "icon": "electron/icon.icns",
+      "identity": "-",
+      "hardenedRuntime": false,
+      "extendInfo": {
+        "NSMicrophoneUsageDescription": "Particles Designer listens to audio input to move the particles."
+      },
       "target": [
         "dmg",
         "dir"
       ]
     },
     "dmg": {
-      "title": "Particles Designer"
+      "title": "Particles Designer",
+      "artifactName": "Particles-Designer-${version}-mac.${ext}"
     }
   }
 }

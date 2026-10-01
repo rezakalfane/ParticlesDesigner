@@ -5,14 +5,16 @@
  * User data (~/Library/Application Support/Particles Designer):
  *   slots.json   saved Preset/Shape library (shared with `npm run dev`)
  *   config.env   optional OPENAI_API_KEY / OPENAI_MODEL / OPENAI_REASONING_EFFORT for AI generation
+ *   update.json  the release version the user chose to skip in the update notice
  */
-import { app, BrowserWindow, Menu, screen, session, shell } from "electron";
+import { app, BrowserWindow, dialog, Menu, screen, session, shell } from "electron";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { createServer } from "node:net";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { parseEnv } from "node:util";
 import { createHost } from "./host";
+import { checkForUpdate } from "./updateCheck";
 
 const APP_NAME = "Particles Designer";
 const PREFERRED_PORT = 5181;
@@ -28,6 +30,7 @@ const root = app.isPackaged
   ? join(app.getAppPath(), "dist")
   : join(fileURLToPath(new URL(".", import.meta.url)), "..", "dist");
 const configPath = join(userData, "config.env");
+const updatePath = join(userData, "update.json");
 
 const CONFIG_TEMPLATE = `# ${APP_NAME} settings. Restart the app after editing.
 # AI design generation (optional):
@@ -61,6 +64,49 @@ async function findPort(): Promise<number> {
     if (free) return port;
   }
   throw new Error("No free localhost port");
+}
+
+function skippedVersion(): string | undefined {
+  try {
+    return (JSON.parse(readFileSync(updatePath, "utf8")) as { skipped?: string }).skipped;
+  } catch {
+    return undefined;
+  }
+}
+
+/** Unsigned builds cannot self-update: offer the GitHub Release page instead. */
+async function offerUpdate(manual: boolean) {
+  const current = app.getVersion();
+  let update;
+  try {
+    update = await checkForUpdate(current);
+  } catch (error) {
+    if (manual)
+      void dialog.showMessageBox({
+        type: "warning",
+        message: "Could not check for updates",
+        detail: error instanceof Error ? error.message : String(error),
+      });
+    return;
+  }
+  if (!update) {
+    if (manual)
+      void dialog.showMessageBox({
+        message: "You're up to date",
+        detail: `${APP_NAME} ${current} is the latest version.`,
+      });
+    return;
+  }
+  if (!manual && update.version === skippedVersion()) return;
+  const { response } = await dialog.showMessageBox({
+    message: `${APP_NAME} ${update.version} is available`,
+    detail: `You have ${current}. Download the new .dmg from the release page, then replace the app in Applications.`,
+    buttons: ["Download", "Later", "Skip This Version"],
+    defaultId: 0,
+    cancelId: 1,
+  });
+  if (response === 0) void shell.openExternal(update.url);
+  if (response === 2) writeFileSync(updatePath, JSON.stringify({ skipped: update.version }));
 }
 
 let win: BrowserWindow | null = null;
@@ -126,13 +172,29 @@ async function boot() {
   session.defaultSession.setPermissionCheckHandler((_wc, p) => ALLOWED.has(p));
   Menu.setApplicationMenu(
     Menu.buildFromTemplate([
-      { role: "appMenu" },
+      {
+        label: APP_NAME,
+        submenu: [
+          { role: "about" },
+          { label: "Check for Updates…", click: () => void offerUpdate(true) },
+          { type: "separator" },
+          { role: "services" },
+          { type: "separator" },
+          { role: "hide" },
+          { role: "hideOthers" },
+          { role: "unhide" },
+          { type: "separator" },
+          { role: "quit" },
+        ],
+      },
       { role: "editMenu" },
       { role: "viewMenu" },
       { role: "windowMenu" },
     ]),
   );
   openWindow();
+  // Quietly, once per launch; dev runs (electron .) carry the source version and would nag.
+  if (app.isPackaged) setTimeout(() => void offerUpdate(false), 5_000);
 }
 
 if (!app.requestSingleInstanceLock()) app.quit();

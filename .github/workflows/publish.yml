@@ -1,6 +1,7 @@
 # Publishes the embed kit to npm (@absolumont/particles-designer) when a version tag
 # is pushed (npm version patch && git push --follow-tags), then creates the GitHub
-# Release (scripts/github-release.sh). jsDelivr and unpkg serve the npm package.
+# Release (scripts/github-release.sh). jsDelivr and unpkg serve the npm package. A macOS
+# job then builds the desktop app (universal, ad-hoc signed) and attaches the .dmg.
 #
 # Uses npm trusted publishing (OIDC): no npm token is stored in GitHub. Configure it once
 # on npmjs.com → the package → Settings → Trusted publishing → GitHub Actions:
@@ -49,3 +50,20 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: scripts/github-release.sh "${GITHUB_REF_NAME}"
+
+  mac-app:
+    needs: publish # the GitHub Release must exist before the .dmg is attached
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      # Ad-hoc signed (mac.identity "-"): no Apple Developer certificate is involved.
+      - run: npm run dist:mac
+      - name: Attach the .dmg to the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release upload "${GITHUB_REF_NAME}" release/*.dmg --clobber

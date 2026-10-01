@@ -35,6 +35,10 @@ for f in roto/*.json; do cp "$f" "$out/roto-$(basename "$f" .json | tr ' ' '-').
   echo "## Downloads"
   echo
   echo "The kit builds below are identical to the npm package; the ROTO-SETUP files go into ROTO-SETUP (MIDI channels 9–11)."
+  echo
+  echo "\`Particles-Designer-${version}-mac.dmg\` is the desktop app (macOS, Apple Silicon and Intel), attached a few minutes" \
+    "after the release is created. It is not signed by Apple: on first launch macOS blocks it; open" \
+    "System Settings → Privacy & Security and click **Open Anyway**. The app tells you when a newer release is out."
 } >"$out/notes.md"
 
 if [ -n "${DRY_RUN:-}" ]; then
