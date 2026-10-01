@@ -1,6 +1,6 @@
 {
   "name": "@absolumont/particles-designer",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "type": "module",
   "description": "Luminous GPU particle fields for any web page: <particle-field> element and ParticleField API, with the Particles Designer (WebGL2, audio-reactive, AI-authored looks).",
   "author": "Reza Kalfane, Absolumont Collective",
