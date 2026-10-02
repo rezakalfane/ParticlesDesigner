@@ -293,6 +293,23 @@ footer {
     left: 20px;
     right: 20px;
     top: 20px;
+    flex-direction: column;
+    gap: 10px;
+  }
+  /* Mobile: compact action row under the wordmark; undo/redo/embed are desktop only. */
+  #design-undo,
+  #design-redo,
+  #embed {
+    display: none;
+  }
+  .header-actions {
+    gap: 6px;
+  }
+  .header-actions button {
+    padding: 5px 9px;
+    font-size: 11px;
+    border-radius: 5px;
+    background: #111d2dcc;
   }
   aside {
     top: auto;
@@ -543,11 +560,16 @@ footer {
   aside {
     bottom: 240px;
   }
+  /* No AI backend: the prompt is hidden, so the panel can use the space. */
+  body.no-ai aside {
+    bottom: 42px;
+  }
   .design-actions > span:last-child {
     display: none;
   }
 }
-body.clean .design-prompt {
+body.clean .design-prompt,
+body.no-ai .design-prompt {
   display: none;
 }
 

@@ -1648,6 +1648,7 @@ void fetch(GENERATE_API)
   .then(async (response) => {
     if (!response.ok) throw new Error();
     const config = await response.json();
+    if (!config.choices?.length) throw new Error();
     const select = el<HTMLSelectElement>("design-engine");
     select.replaceChildren(
       ...config.choices.map((choice: { model: string; effort: string }) => {
@@ -1668,6 +1669,7 @@ void fetch(GENERATE_API)
   })
   .catch(() => {
     aiAvailable = false;
+    document.body.classList.add("no-ai");
     el("design-model").textContent = " · AI unavailable";
   });
 
